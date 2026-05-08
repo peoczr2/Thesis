@@ -1,0 +1,2578 @@
+========== TOP LEVEL ==========
+typeof(mirp) = MIRP
+summary(mirp) = MIRP
+fieldnames(typeof(mirp)) = [:name, :type, :metadata, :ports, :load_ports, :unload_ports, :classes, :vessels, :distances, :lb, :ub]
+
+========== FIELD OVERVIEW ==========
+name :: String
+  value = "LR1_1_DR1_3_VC1_V7a"
+type :: Symbol
+  value = :Group1
+metadata :: Metadata
+  summary = Metadata
+ports :: Vector{Port}
+  size = (4,), length = 4
+load_ports :: Vector{Port}
+  size = (1,), length = 1
+unload_ports :: Vector{Port}
+  size = (3,), length = 3
+classes :: Vector{Class}
+  size = (1,), length = 1
+vessels :: Vector{Vessel}
+  size = (7,), length = 7
+distances :: Matrix{Float64}
+  size = (4, 4), length = 16
+lb :: Float64
+  value = -17847.0
+ub :: Float64
+  value = -16675.0
+
+========== RECURSIVE INSPECTION ==========
+mirp :: MIRP
+  fields = [:name, :type, :metadata, :ports, :load_ports, :unload_ports, :classes, :vessels, :distances, :lb, :ub]
+  name :: String
+    value = "LR1_1_DR1_3_VC1_V7a"
+  type :: Symbol
+    value = :Group1
+  metadata :: Metadata
+    fields = [:n_periods, :n_commodities, :n_ports, :n_ports_per_region, :n_load_regions, :n_unload_regions, :n_ports_per_load_region, :n_ports_per_unload_region, :n_vessels, :n_vessel_classes, :n_vessels_per_class, :hours_per_period, :spot_market_price, :spot_market_discount, :attempt_cost, :reward_finishing_early, :single_period_alpha_slack, :cumulative_alpha_slack]
+    n_periods :: Int64
+      value = 60
+    n_commodities :: Int64
+      value = 1
+    n_ports :: Int64
+      value = 4
+    n_ports_per_region :: Vector{Int64}
+      size = (2,), length = 2
+      [1] :: Int64
+        value = 1
+      [2] :: Int64
+        value = 3
+    n_load_regions :: Int64
+      value = 1
+    n_unload_regions :: Int64
+      value = 1
+    n_ports_per_load_region :: Vector{Int64}
+      size = (1,), length = 1
+      [1] :: Int64
+        value = 1
+    n_ports_per_unload_region :: Vector{Int64}
+      size = (1,), length = 1
+      [1] :: Int64
+        value = 3
+    n_vessels :: Int64
+      value = 7
+    n_vessel_classes :: Int64
+      value = 1
+    n_vessels_per_class :: Vector{Int64}
+      size = (1,), length = 1
+      [1] :: Int64
+        value = 7
+    hours_per_period :: Float64
+      value = 24.0
+    spot_market_price :: Float64
+      value = 1.0
+    spot_market_discount :: Float64
+      value = 0.999
+    attempt_cost :: Float64
+      value = 0.01
+    reward_finishing_early :: Float64
+      value = 0.01
+    single_period_alpha_slack :: Float64
+      value = 0.5
+    cumulative_alpha_slack :: Float64
+      value = 1.0
+  ports :: Vector{Port}
+    size = (4,), length = 4
+    [1] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 1
+      name :: String
+        value = "LoadingRegion_0_Port_0"
+      type :: Symbol
+        value = :loading
+      Δ :: Int64
+        value = 1
+      region_id :: Int64
+        value = 1
+      x :: Float64
+        value = 12199.0
+      y :: Float64
+        value = 11845.0
+      fee :: Float64
+        value = 38.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 322
+      min_amt :: Int64
+        value = 35
+      capacity :: Int64
+        value = 594
+      inventory :: Int64
+        value = 297
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 99
+        [2] :: Int64
+          value = 99
+        [3] :: Int64
+          value = 99
+        [4] :: Int64
+          value = 99
+        [5] :: Int64
+          value = 99
+        [6] :: Int64
+          value = 99
+        [7] :: Int64
+          value = 99
+        [8] :: Int64
+          value = 99
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 0.0
+        [2] :: Float64
+          value = 0.0
+        [3] :: Float64
+          value = 0.0
+        [4] :: Float64
+          value = 0.0
+        [5] :: Float64
+          value = 0.0
+        [6] :: Float64
+          value = 0.0
+        [7] :: Float64
+          value = 0.0
+        [8] :: Float64
+          value = 0.0
+        ... 352 more items
+    [2] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 2
+      name :: String
+        value = "DischargeRegion_0_Port_0"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17305.0
+      y :: Float64
+        value = 14581.0
+      fee :: Float64
+        value = 57.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 390
+      min_amt :: Int64
+        value = 50
+      capacity :: Int64
+        value = 351
+      inventory :: Int64
+        value = 168
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 39
+        [2] :: Int64
+          value = 39
+        [3] :: Int64
+          value = 39
+        [4] :: Int64
+          value = 39
+        [5] :: Int64
+          value = 39
+        [6] :: Int64
+          value = 39
+        [7] :: Int64
+          value = 39
+        [8] :: Int64
+          value = 39
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+    [3] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 3
+      name :: String
+        value = "DischargeRegion_0_Port_1"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17393.0
+      y :: Float64
+        value = 14267.0
+      fee :: Float64
+        value = 58.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 544
+      min_amt :: Int64
+        value = 35
+      capacity :: Int64
+        value = 510
+      inventory :: Int64
+        value = 255
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 34
+        [2] :: Int64
+          value = 34
+        [3] :: Int64
+          value = 34
+        [4] :: Int64
+          value = 34
+        [5] :: Int64
+          value = 34
+        [6] :: Int64
+          value = 34
+        [7] :: Int64
+          value = 34
+        [8] :: Int64
+          value = 34
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+    [4] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 4
+      name :: String
+        value = "DischargeRegion_0_Port_2"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17330.0
+      y :: Float64
+        value = 14243.0
+      fee :: Float64
+        value = 66.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 259
+      min_amt :: Int64
+        value = 20
+      capacity :: Int64
+        value = 312
+      inventory :: Int64
+        value = 156
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 26
+        [2] :: Int64
+          value = 26
+        [3] :: Int64
+          value = 26
+        [4] :: Int64
+          value = 26
+        [5] :: Int64
+          value = 26
+        [6] :: Int64
+          value = 26
+        [7] :: Int64
+          value = 26
+        [8] :: Int64
+          value = 26
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+  load_ports :: Vector{Port}
+    size = (1,), length = 1
+    [1] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 1
+      name :: String
+        value = "LoadingRegion_0_Port_0"
+      type :: Symbol
+        value = :loading
+      Δ :: Int64
+        value = 1
+      region_id :: Int64
+        value = 1
+      x :: Float64
+        value = 12199.0
+      y :: Float64
+        value = 11845.0
+      fee :: Float64
+        value = 38.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 322
+      min_amt :: Int64
+        value = 35
+      capacity :: Int64
+        value = 594
+      inventory :: Int64
+        value = 297
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 99
+        [2] :: Int64
+          value = 99
+        [3] :: Int64
+          value = 99
+        [4] :: Int64
+          value = 99
+        [5] :: Int64
+          value = 99
+        [6] :: Int64
+          value = 99
+        [7] :: Int64
+          value = 99
+        [8] :: Int64
+          value = 99
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 0.0
+        [2] :: Float64
+          value = 0.0
+        [3] :: Float64
+          value = 0.0
+        [4] :: Float64
+          value = 0.0
+        [5] :: Float64
+          value = 0.0
+        [6] :: Float64
+          value = 0.0
+        [7] :: Float64
+          value = 0.0
+        [8] :: Float64
+          value = 0.0
+        ... 352 more items
+  unload_ports :: Vector{Port}
+    size = (3,), length = 3
+    [1] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 2
+      name :: String
+        value = "DischargeRegion_0_Port_0"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17305.0
+      y :: Float64
+        value = 14581.0
+      fee :: Float64
+        value = 57.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 390
+      min_amt :: Int64
+        value = 50
+      capacity :: Int64
+        value = 351
+      inventory :: Int64
+        value = 168
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 39
+        [2] :: Int64
+          value = 39
+        [3] :: Int64
+          value = 39
+        [4] :: Int64
+          value = 39
+        [5] :: Int64
+          value = 39
+        [6] :: Int64
+          value = 39
+        [7] :: Int64
+          value = 39
+        [8] :: Int64
+          value = 39
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+    [2] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 3
+      name :: String
+        value = "DischargeRegion_0_Port_1"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17393.0
+      y :: Float64
+        value = 14267.0
+      fee :: Float64
+        value = 58.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 544
+      min_amt :: Int64
+        value = 35
+      capacity :: Int64
+        value = 510
+      inventory :: Int64
+        value = 255
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 34
+        [2] :: Int64
+          value = 34
+        [3] :: Int64
+          value = 34
+        [4] :: Int64
+          value = 34
+        [5] :: Int64
+          value = 34
+        [6] :: Int64
+          value = 34
+        [7] :: Int64
+          value = 34
+        [8] :: Int64
+          value = 34
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+    [3] :: Port
+      fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+      id :: Int64
+        value = 4
+      name :: String
+        value = "DischargeRegion_0_Port_2"
+      type :: Symbol
+        value = :unloading
+      Δ :: Int64
+        value = -1
+      region_id :: Int64
+        value = 2
+      x :: Float64
+        value = 17330.0
+      y :: Float64
+        value = 14243.0
+      fee :: Float64
+        value = 66.0
+      berth_limit :: Int64
+        value = 1
+      max_amt :: Int64
+        value = 259
+      min_amt :: Int64
+        value = 20
+      capacity :: Int64
+        value = 312
+      inventory :: Int64
+        value = 156
+      rates :: Vector{Int64}
+        size = (360,), length = 360
+        [1] :: Int64
+          value = 26
+        [2] :: Int64
+          value = 26
+        [3] :: Int64
+          value = 26
+        [4] :: Int64
+          value = 26
+        [5] :: Int64
+          value = 26
+        [6] :: Int64
+          value = 26
+        [7] :: Int64
+          value = 26
+        [8] :: Int64
+          value = 26
+        ... 352 more items
+      prices :: Vector{Float64}
+        size = (360,), length = 360
+        [1] :: Float64
+          value = 5.18
+        [2] :: Float64
+          value = 5.18
+        [3] :: Float64
+          value = 5.18
+        [4] :: Float64
+          value = 5.18
+        [5] :: Float64
+          value = 5.18
+        [6] :: Float64
+          value = 5.18
+        [7] :: Float64
+          value = 5.18
+        [8] :: Float64
+          value = 5.18
+        ... 352 more items
+  classes :: Vector{Class}
+    size = (1,), length = 1
+    [1] :: Class{Vessel}
+      fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+      id :: Int64
+        value = 1
+      name :: String
+        value = "Vessel_Class_0"
+      capacity :: Int64
+        value = 300
+      speed :: Float64
+        value = 15.0
+      travel_cost_km :: Float64
+        value = 0.075
+      discount_empty :: Float64
+        value = 0.2
+      vessels :: Vector{Vessel}
+        size = (7,), length = 7
+        [1] :: Vessel
+          <max depth reached>
+        [2] :: Vessel
+          <max depth reached>
+        [3] :: Vessel
+          <max depth reached>
+        [4] :: Vessel
+          <max depth reached>
+        [5] :: Vessel
+          <max depth reached>
+        [6] :: Vessel
+          <max depth reached>
+        [7] :: Vessel
+          <max depth reached>
+      travel_times :: Matrix{Int64}
+        size = (4, 4), length = 16
+        [1] :: Int64
+          value = 0
+        [2] :: Int64
+          value = 9
+        [3] :: Int64
+          value = 9
+        [4] :: Int64
+          value = 9
+        [5] :: Int64
+          value = 9
+        [6] :: Int64
+          value = 0
+        [7] :: Int64
+          value = 1
+        [8] :: Int64
+          value = 1
+        ... 8 more items
+  vessels :: Vector{Vessel}
+    size = (7,), length = 7
+    [1] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 1
+      name :: String
+        value = "Vessel_0"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 300
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 4
+        name :: String
+          value = "DischargeRegion_0_Port_2"
+        type :: Symbol
+          value = :unloading
+        Δ :: Int64
+          value = -1
+        region_id :: Int64
+          value = 2
+        x :: Float64
+          value = 17330.0
+        y :: Float64
+          value = 14243.0
+        fee :: Float64
+          value = 66.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 259
+        min_amt :: Int64
+          value = 20
+        capacity :: Int64
+          value = 312
+        inventory :: Int64
+          value = 156
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 7
+    [2] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 2
+      name :: String
+        value = "Vessel_1"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 0
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "LoadingRegion_0_Port_0"
+        type :: Symbol
+          value = :loading
+        Δ :: Int64
+          value = 1
+        region_id :: Int64
+          value = 1
+        x :: Float64
+          value = 12199.0
+        y :: Float64
+          value = 11845.0
+        fee :: Float64
+          value = 38.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 322
+        min_amt :: Int64
+          value = 35
+        capacity :: Int64
+          value = 594
+        inventory :: Int64
+          value = 297
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 8
+    [3] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 3
+      name :: String
+        value = "Vessel_2"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 0
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "LoadingRegion_0_Port_0"
+        type :: Symbol
+          value = :loading
+        Δ :: Int64
+          value = 1
+        region_id :: Int64
+          value = 1
+        x :: Float64
+          value = 12199.0
+        y :: Float64
+          value = 11845.0
+        fee :: Float64
+          value = 38.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 322
+        min_amt :: Int64
+          value = 35
+        capacity :: Int64
+          value = 594
+        inventory :: Int64
+          value = 297
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 1
+    [4] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 4
+      name :: String
+        value = "Vessel_3"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 0
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "LoadingRegion_0_Port_0"
+        type :: Symbol
+          value = :loading
+        Δ :: Int64
+          value = 1
+        region_id :: Int64
+          value = 1
+        x :: Float64
+          value = 12199.0
+        y :: Float64
+          value = 11845.0
+        fee :: Float64
+          value = 38.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 322
+        min_amt :: Int64
+          value = 35
+        capacity :: Int64
+          value = 594
+        inventory :: Int64
+          value = 297
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 6
+    [5] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 5
+      name :: String
+        value = "Vessel_4"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 0
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "LoadingRegion_0_Port_0"
+        type :: Symbol
+          value = :loading
+        Δ :: Int64
+          value = 1
+        region_id :: Int64
+          value = 1
+        x :: Float64
+          value = 12199.0
+        y :: Float64
+          value = 11845.0
+        fee :: Float64
+          value = 38.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 322
+        min_amt :: Int64
+          value = 35
+        capacity :: Int64
+          value = 594
+        inventory :: Int64
+          value = 297
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 3
+    [6] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 6
+      name :: String
+        value = "Vessel_5"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 300
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 2
+        name :: String
+          value = "DischargeRegion_0_Port_0"
+        type :: Symbol
+          value = :unloading
+        Δ :: Int64
+          value = -1
+        region_id :: Int64
+          value = 2
+        x :: Float64
+          value = 17305.0
+        y :: Float64
+          value = 14581.0
+        fee :: Float64
+          value = 57.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 390
+        min_amt :: Int64
+          value = 50
+        capacity :: Int64
+          value = 351
+        inventory :: Int64
+          value = 168
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 2
+    [7] :: Vessel
+      fields = [:id, :name, :class, :inventory, :initial_port, :first_time]
+      id :: Int64
+        value = 7
+      name :: String
+        value = "Vessel_6"
+      class :: Class{Vessel}
+        fields = [:id, :name, :capacity, :speed, :travel_cost_km, :discount_empty, :vessels, :travel_times]
+        id :: Int64
+          value = 1
+        name :: String
+          value = "Vessel_Class_0"
+        capacity :: Int64
+          value = 300
+        speed :: Float64
+          value = 15.0
+        travel_cost_km :: Float64
+          value = 0.075
+        discount_empty :: Float64
+          value = 0.2
+        vessels :: Vector{Vessel}
+          <max depth reached>
+        travel_times :: Matrix{Int64}
+          <max depth reached>
+      inventory :: Int64
+        value = 300
+      initial_port :: Port
+        fields = [:id, :name, :type, :Δ, :region_id, :x, :y, :fee, :berth_limit, :max_amt, :min_amt, :capacity, :inventory, :rates, :prices]
+        id :: Int64
+          value = 3
+        name :: String
+          value = "DischargeRegion_0_Port_1"
+        type :: Symbol
+          value = :unloading
+        Δ :: Int64
+          value = -1
+        region_id :: Int64
+          value = 2
+        x :: Float64
+          value = 17393.0
+        y :: Float64
+          value = 14267.0
+        fee :: Float64
+          value = 58.0
+        berth_limit :: Int64
+          value = 1
+        max_amt :: Int64
+          value = 544
+        min_amt :: Int64
+          value = 35
+        capacity :: Int64
+          value = 510
+        inventory :: Int64
+          value = 255
+        rates :: Vector{Int64}
+          <max depth reached>
+        prices :: Vector{Float64}
+          <max depth reached>
+      first_time :: Int64
+        value = 5
+  distances :: Matrix{Float64}
+    size = (4, 4), length = 16
+    [1] :: Float64
+      value = 0.0
+    [2] :: Float64
+      value = 5792.83
+    [3] :: Float64
+      value = 5730.94
+    [4] :: Float64
+      value = 5663.71
+    [5] :: Float64
+      value = 5792.83
+    [6] :: Float64
+      value = 0.0
+    [7] :: Float64
+      value = 326.1
+    [8] :: Float64
+      value = 338.92
+    ... 8 more items
+  lb :: Float64
+    value = -17847.0
+  ub :: Float64
+    value = -16675.0
+
+========== FULL DUMP ==========
+MIRP
+  name: String "LR1_1_DR1_3_VC1_V7a"
+  type: Symbol Group1
+  metadata: Metadata
+    n_periods: Int64 60
+    n_commodities: Int64 1
+    n_ports: Int64 4
+    n_ports_per_region: Array{Int64}((2,)) [1, 3]
+    n_load_regions: Int64 1
+    n_unload_regions: Int64 1
+    n_ports_per_load_region: Array{Int64}((1,)) [1]
+    n_ports_per_unload_region: Array{Int64}((1,)) [3]
+    n_vessels: Int64 7
+    n_vessel_classes: Int64 1
+    n_vessels_per_class: Array{Int64}((1,)) [7]
+    hours_per_period: Float64 24.0
+    spot_market_price: Float64 1.0
+    spot_market_discount: Float64 0.999
+    attempt_cost: Float64 0.01
+    reward_finishing_early: Float64 0.01
+    single_period_alpha_slack: Float64 0.5
+    cumulative_alpha_slack: Float64 1.0
+  ports: Array{Port}((4,))
+    1: Port
+      id: Int64 1
+      name: String "LoadingRegion_0_Port_0"
+      type: Symbol loading
+      Δ: Int64 1
+      region_id: Int64 1
+      x: Float64 12199.0
+      y: Float64 11845.0
+      fee: Float64 38.0
+      berth_limit: Int64 1
+      max_amt: Int64 322
+      min_amt: Int64 35
+      capacity: Int64 594
+      inventory: Int64 297
+      rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+      prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    2: Port
+      id: Int64 2
+      name: String "DischargeRegion_0_Port_0"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17305.0
+      y: Float64 14581.0
+      fee: Float64 57.0
+      berth_limit: Int64 1
+      max_amt: Int64 390
+      min_amt: Int64 50
+      capacity: Int64 351
+      inventory: Int64 168
+      rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+    3: Port
+      id: Int64 3
+      name: String "DischargeRegion_0_Port_1"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17393.0
+      y: Float64 14267.0
+      fee: Float64 58.0
+      berth_limit: Int64 1
+      max_amt: Int64 544
+      min_amt: Int64 35
+      capacity: Int64 510
+      inventory: Int64 255
+      rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+    4: Port
+      id: Int64 4
+      name: String "DischargeRegion_0_Port_2"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17330.0
+      y: Float64 14243.0
+      fee: Float64 66.0
+      berth_limit: Int64 1
+      max_amt: Int64 259
+      min_amt: Int64 20
+      capacity: Int64 312
+      inventory: Int64 156
+      rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+  load_ports: Array{Port}((1,))
+    1: Port
+      id: Int64 1
+      name: String "LoadingRegion_0_Port_0"
+      type: Symbol loading
+      Δ: Int64 1
+      region_id: Int64 1
+      x: Float64 12199.0
+      y: Float64 11845.0
+      fee: Float64 38.0
+      berth_limit: Int64 1
+      max_amt: Int64 322
+      min_amt: Int64 35
+      capacity: Int64 594
+      inventory: Int64 297
+      rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+      prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  unload_ports: Array{Port}((3,))
+    1: Port
+      id: Int64 2
+      name: String "DischargeRegion_0_Port_0"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17305.0
+      y: Float64 14581.0
+      fee: Float64 57.0
+      berth_limit: Int64 1
+      max_amt: Int64 390
+      min_amt: Int64 50
+      capacity: Int64 351
+      inventory: Int64 168
+      rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+    2: Port
+      id: Int64 3
+      name: String "DischargeRegion_0_Port_1"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17393.0
+      y: Float64 14267.0
+      fee: Float64 58.0
+      berth_limit: Int64 1
+      max_amt: Int64 544
+      min_amt: Int64 35
+      capacity: Int64 510
+      inventory: Int64 255
+      rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+    3: Port
+      id: Int64 4
+      name: String "DischargeRegion_0_Port_2"
+      type: Symbol unloading
+      Δ: Int64 -1
+      region_id: Int64 2
+      x: Float64 17330.0
+      y: Float64 14243.0
+      fee: Float64 66.0
+      berth_limit: Int64 1
+      max_amt: Int64 259
+      min_amt: Int64 20
+      capacity: Int64 312
+      inventory: Int64 156
+      rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+      prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+  classes: Array{Class}((1,))
+    1: Class{Vessel}
+      id: Int64 1
+      name: String "Vessel_Class_0"
+      capacity: Int64 300
+      speed: Float64 15.0
+      travel_cost_km: Float64 0.075
+      discount_empty: Float64 0.2
+      vessels: Array{Vessel}((7,))
+        1: Vessel
+          id: Int64 1
+          name: String "Vessel_0"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 300
+          initial_port: Port
+            id: Int64 4
+            name: String "DischargeRegion_0_Port_2"
+            type: Symbol unloading
+            Δ: Int64 -1
+            region_id: Int64 2
+            x: Float64 17330.0
+            y: Float64 14243.0
+            fee: Float64 66.0
+            berth_limit: Int64 1
+            max_amt: Int64 259
+            min_amt: Int64 20
+            capacity: Int64 312
+            inventory: Int64 156
+            rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+            prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+          first_time: Int64 7
+        2: Vessel
+          id: Int64 2
+          name: String "Vessel_1"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 0
+          initial_port: Port
+            id: Int64 1
+            name: String "LoadingRegion_0_Port_0"
+            type: Symbol loading
+            Δ: Int64 1
+            region_id: Int64 1
+            x: Float64 12199.0
+            y: Float64 11845.0
+            fee: Float64 38.0
+            berth_limit: Int64 1
+            max_amt: Int64 322
+            min_amt: Int64 35
+            capacity: Int64 594
+            inventory: Int64 297
+            rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+            prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          first_time: Int64 8
+        3: Vessel
+          id: Int64 3
+          name: String "Vessel_2"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 0
+          initial_port: Port
+            id: Int64 1
+            name: String "LoadingRegion_0_Port_0"
+            type: Symbol loading
+            Δ: Int64 1
+            region_id: Int64 1
+            x: Float64 12199.0
+            y: Float64 11845.0
+            fee: Float64 38.0
+            berth_limit: Int64 1
+            max_amt: Int64 322
+            min_amt: Int64 35
+            capacity: Int64 594
+            inventory: Int64 297
+            rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+            prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          first_time: Int64 1
+        4: Vessel
+          id: Int64 4
+          name: String "Vessel_3"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 0
+          initial_port: Port
+            id: Int64 1
+            name: String "LoadingRegion_0_Port_0"
+            type: Symbol loading
+            Δ: Int64 1
+            region_id: Int64 1
+            x: Float64 12199.0
+            y: Float64 11845.0
+            fee: Float64 38.0
+            berth_limit: Int64 1
+            max_amt: Int64 322
+            min_amt: Int64 35
+            capacity: Int64 594
+            inventory: Int64 297
+            rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+            prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          first_time: Int64 6
+        5: Vessel
+          id: Int64 5
+          name: String "Vessel_4"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 0
+          initial_port: Port
+            id: Int64 1
+            name: String "LoadingRegion_0_Port_0"
+            type: Symbol loading
+            Δ: Int64 1
+            region_id: Int64 1
+            x: Float64 12199.0
+            y: Float64 11845.0
+            fee: Float64 38.0
+            berth_limit: Int64 1
+            max_amt: Int64 322
+            min_amt: Int64 35
+            capacity: Int64 594
+            inventory: Int64 297
+            rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+            prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          first_time: Int64 3
+        6: Vessel
+          id: Int64 6
+          name: String "Vessel_5"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 300
+          initial_port: Port
+            id: Int64 2
+            name: String "DischargeRegion_0_Port_0"
+            type: Symbol unloading
+            Δ: Int64 -1
+            region_id: Int64 2
+            x: Float64 17305.0
+            y: Float64 14581.0
+            fee: Float64 57.0
+            berth_limit: Int64 1
+            max_amt: Int64 390
+            min_amt: Int64 50
+            capacity: Int64 351
+            inventory: Int64 168
+            rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+            prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+          first_time: Int64 2
+        7: Vessel
+          id: Int64 7
+          name: String "Vessel_6"
+          class: Class{Vessel}#= circular reference @-3 =#
+          inventory: Int64 300
+          initial_port: Port
+            id: Int64 3
+            name: String "DischargeRegion_0_Port_1"
+            type: Symbol unloading
+            Δ: Int64 -1
+            region_id: Int64 2
+            x: Float64 17393.0
+            y: Float64 14267.0
+            fee: Float64 58.0
+            berth_limit: Int64 1
+            max_amt: Int64 544
+            min_amt: Int64 35
+            capacity: Int64 510
+            inventory: Int64 255
+            rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+            prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+          first_time: Int64 5
+      travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+  vessels: Array{Vessel}((7,))
+    1: Vessel
+      id: Int64 1
+      name: String "Vessel_0"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel#= circular reference @-3 =#
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 300
+      initial_port: Port
+        id: Int64 4
+        name: String "DischargeRegion_0_Port_2"
+        type: Symbol unloading
+        Δ: Int64 -1
+        region_id: Int64 2
+        x: Float64 17330.0
+        y: Float64 14243.0
+        fee: Float64 66.0
+        berth_limit: Int64 1
+        max_amt: Int64 259
+        min_amt: Int64 20
+        capacity: Int64 312
+        inventory: Int64 156
+        rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+        prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+      first_time: Int64 7
+    2: Vessel
+      id: Int64 2
+      name: String "Vessel_1"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel#= circular reference @-3 =#
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 0
+      initial_port: Port
+        id: Int64 1
+        name: String "LoadingRegion_0_Port_0"
+        type: Symbol loading
+        Δ: Int64 1
+        region_id: Int64 1
+        x: Float64 12199.0
+        y: Float64 11845.0
+        fee: Float64 38.0
+        berth_limit: Int64 1
+        max_amt: Int64 322
+        min_amt: Int64 35
+        capacity: Int64 594
+        inventory: Int64 297
+        rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+        prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      first_time: Int64 8
+    3: Vessel
+      id: Int64 3
+      name: String "Vessel_2"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel#= circular reference @-3 =#
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 0
+      initial_port: Port
+        id: Int64 1
+        name: String "LoadingRegion_0_Port_0"
+        type: Symbol loading
+        Δ: Int64 1
+        region_id: Int64 1
+        x: Float64 12199.0
+        y: Float64 11845.0
+        fee: Float64 38.0
+        berth_limit: Int64 1
+        max_amt: Int64 322
+        min_amt: Int64 35
+        capacity: Int64 594
+        inventory: Int64 297
+        rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+        prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      first_time: Int64 1
+    4: Vessel
+      id: Int64 4
+      name: String "Vessel_3"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel#= circular reference @-3 =#
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 0
+      initial_port: Port
+        id: Int64 1
+        name: String "LoadingRegion_0_Port_0"
+        type: Symbol loading
+        Δ: Int64 1
+        region_id: Int64 1
+        x: Float64 12199.0
+        y: Float64 11845.0
+        fee: Float64 38.0
+        berth_limit: Int64 1
+        max_amt: Int64 322
+        min_amt: Int64 35
+        capacity: Int64 594
+        inventory: Int64 297
+        rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+        prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      first_time: Int64 6
+    5: Vessel
+      id: Int64 5
+      name: String "Vessel_4"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel#= circular reference @-3 =#
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 0
+      initial_port: Port
+        id: Int64 1
+        name: String "LoadingRegion_0_Port_0"
+        type: Symbol loading
+        Δ: Int64 1
+        region_id: Int64 1
+        x: Float64 12199.0
+        y: Float64 11845.0
+        fee: Float64 38.0
+        berth_limit: Int64 1
+        max_amt: Int64 322
+        min_amt: Int64 35
+        capacity: Int64 594
+        inventory: Int64 297
+        rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+        prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      first_time: Int64 3
+    6: Vessel
+      id: Int64 6
+      name: String "Vessel_5"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel#= circular reference @-3 =#
+          7: Vessel
+            id: Int64 7
+            name: String "Vessel_6"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 3
+              name: String "DischargeRegion_0_Port_1"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17393.0
+              y: Float64 14267.0
+              fee: Float64 58.0
+              berth_limit: Int64 1
+              max_amt: Int64 544
+              min_amt: Int64 35
+              capacity: Int64 510
+              inventory: Int64 255
+              rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 5
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 300
+      initial_port: Port
+        id: Int64 2
+        name: String "DischargeRegion_0_Port_0"
+        type: Symbol unloading
+        Δ: Int64 -1
+        region_id: Int64 2
+        x: Float64 17305.0
+        y: Float64 14581.0
+        fee: Float64 57.0
+        berth_limit: Int64 1
+        max_amt: Int64 390
+        min_amt: Int64 50
+        capacity: Int64 351
+        inventory: Int64 168
+        rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+        prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+      first_time: Int64 2
+    7: Vessel
+      id: Int64 7
+      name: String "Vessel_6"
+      class: Class{Vessel}
+        id: Int64 1
+        name: String "Vessel_Class_0"
+        capacity: Int64 300
+        speed: Float64 15.0
+        travel_cost_km: Float64 0.075
+        discount_empty: Float64 0.2
+        vessels: Array{Vessel}((7,))
+          1: Vessel
+            id: Int64 1
+            name: String "Vessel_0"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 4
+              name: String "DischargeRegion_0_Port_2"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17330.0
+              y: Float64 14243.0
+              fee: Float64 66.0
+              berth_limit: Int64 1
+              max_amt: Int64 259
+              min_amt: Int64 20
+              capacity: Int64 312
+              inventory: Int64 156
+              rates: Array{Int64}((360,)) [26, 26, 26, 26, 26, 26, 26, 26, 26, 26  …  26, 26, 26, 26, 26, 26, 26, 26, 26, 26]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 7
+          2: Vessel
+            id: Int64 2
+            name: String "Vessel_1"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 8
+          3: Vessel
+            id: Int64 3
+            name: String "Vessel_2"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 1
+          4: Vessel
+            id: Int64 4
+            name: String "Vessel_3"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 6
+          5: Vessel
+            id: Int64 5
+            name: String "Vessel_4"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 0
+            initial_port: Port
+              id: Int64 1
+              name: String "LoadingRegion_0_Port_0"
+              type: Symbol loading
+              Δ: Int64 1
+              region_id: Int64 1
+              x: Float64 12199.0
+              y: Float64 11845.0
+              fee: Float64 38.0
+              berth_limit: Int64 1
+              max_amt: Int64 322
+              min_amt: Int64 35
+              capacity: Int64 594
+              inventory: Int64 297
+              rates: Array{Int64}((360,)) [99, 99, 99, 99, 99, 99, 99, 99, 99, 99  …  99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
+              prices: Array{Float64}((360,)) [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            first_time: Int64 3
+          6: Vessel
+            id: Int64 6
+            name: String "Vessel_5"
+            class: Class{Vessel}#= circular reference @-3 =#
+            inventory: Int64 300
+            initial_port: Port
+              id: Int64 2
+              name: String "DischargeRegion_0_Port_0"
+              type: Symbol unloading
+              Δ: Int64 -1
+              region_id: Int64 2
+              x: Float64 17305.0
+              y: Float64 14581.0
+              fee: Float64 57.0
+              berth_limit: Int64 1
+              max_amt: Int64 390
+              min_amt: Int64 50
+              capacity: Int64 351
+              inventory: Int64 168
+              rates: Array{Int64}((360,)) [39, 39, 39, 39, 39, 39, 39, 39, 39, 39  …  39, 39, 39, 39, 39, 39, 39, 39, 39, 39]
+              prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+            first_time: Int64 2
+          7: Vessel#= circular reference @-3 =#
+        travel_times: Array{Int64}((4, 4)) [0 9 9 9; 9 0 1 1; 9 1 0 1; 9 1 1 0]
+      inventory: Int64 300
+      initial_port: Port
+        id: Int64 3
+        name: String "DischargeRegion_0_Port_1"
+        type: Symbol unloading
+        Δ: Int64 -1
+        region_id: Int64 2
+        x: Float64 17393.0
+        y: Float64 14267.0
+        fee: Float64 58.0
+        berth_limit: Int64 1
+        max_amt: Int64 544
+        min_amt: Int64 35
+        capacity: Int64 510
+        inventory: Int64 255
+        rates: Array{Int64}((360,)) [34, 34, 34, 34, 34, 34, 34, 34, 34, 34  …  34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+        prices: Array{Float64}((360,)) [5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18  …  5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18, 5.18]
+      first_time: Int64 5
+  distances: Array{Float64}((4, 4)) [0.0 5792.83 5730.94 5663.71; 5792.83 0.0 326.1 338.92; 5730.94 326.1 0.0 67.42; 5663.71 338.92 67.42 0.0]
+  lb: Float64 -17847.0
+  ub: Float64 -16675.0
