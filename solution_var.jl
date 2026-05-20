@@ -17,7 +17,9 @@ struct Call
     acc_total_costs::Float64
 end
 
-struct Solution
-    calls::Vector{Call}
-    score::Float64
+struct Solution{P, V}
+    calls::Vector{Call} = []
+    score::Float64 = 0.0
+    last_occ_ports::Vector{Union{Nothing, Call}} = Vector{Union{Nothing, Call}}(undef, MIRP.ports)
+    last_occ_vessels::Vector{Union{Nothing, Call}} = Vector{Union{Nothing, Call}}(undef, MIRP.vessels)
 end

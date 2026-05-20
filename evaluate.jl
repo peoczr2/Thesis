@@ -3,7 +3,9 @@ function distance(p1::Port, p2::Port)
     return sqrt((p1.x - p2.x)^2 + (p1.y - p2.y)^2)
 end
 
-function evaluate_solution(MIRP, solution, C::Matrix{Matrix{Float64}}, P::Matrix{Float64})
+function evaluate_call()
+
+function evaluate_solution(MIRP, solution::Solution, C::Matrix{Matrix{Float64}}, P::Matrix{Float64})
     last_occ_vessels = Vector{Union{Nothing, Call}}(undef, length(MIRP.vessels))
     last_occ_ports = Vector{Union{Nothing, Call}}(undef, length(MIRP.ports))
     for call in solution.calls
@@ -58,4 +60,6 @@ function evaluate_solution(MIRP, solution, C::Matrix{Matrix{Float64}}, P::Matrix
         call.acc_routing_costs += C[call.vessel.class.id][call.port.id][call.last_occ_vessel !== nothing ? call.last_occ_vessel.port.id : call.vessel.initial_port.id]
         call.acc_total_costs = call.acc_routing_costs + call.acc_inventory_costs
     end
+    solution.score = solution.calls[-1].acc_total_costs
+    return solution
 end
