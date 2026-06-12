@@ -1,33 +1,76 @@
 
+using Random
 
+# Table 4 parameters from the paper's ILS tuning section.
+Base.@kwdef struct ILSParameters
+    initial_probability::Float64 = 0.79
+    final_probability::Float64 = 0.01
+    iterations::Int64 = 640
+    restore_after::Int64 = 4
+    perturbations::Int64 = 2
+end
 
-function iterated_local_search(initial_solution, iterations)
-    current_solution = initial_solution
-    new_solution = initial_solution
-    for i in 1:iterations
-        new_solution = apply_perturbation(current_solution)
-        new_solution = apply_perturbation(new_solution)
-        new_solution = local_search(new_solution)
+const PAPER_ILS_PARAMETERS = ILSParameters()
 
-        if sim_annealing_criterion(new_solution, current_solution)
-            if new_solution.score <= current_solution.score
+# Exponential interpolation between the reported initial and final acceptance
+# probabilities for non-improving moves.
+function annealing_probability(iteration::Int64, params::ILSParameters)
+    if params.iterations <= 1
+        return params.final_probability
+    end
+
+    progress = (iteration - 1) / (params.iterations - 1)
+    return params.initial_probability * (params.final_probability / params.initial_probability)^progress
+end
+
+function sim_annealing_criterion(
+    new_solution::Solution,
+    current_solution::Solution,
+    iteration::Int64,
+    params::ILSParameters,
+    rng::AbstractRNG,
+)
+    new_solution.score + EPS < current_solution.score && return true
+    return rand(rng) <= annealing_probability(iteration, params)
+end
+
+# Perturb, locally improve, accept with simulated annealing, and periodically
+# restore the search to the best incumbent after accepted non-improvements.
+function iterated_local_search(
+    mirp::MIRP,
+    initial_solution::Solution;
+    rng::AbstractRNG = Random.default_rng(),
+    params::ILSParameters = PAPER_ILS_PARAMETERS,
+)
+    current_solution = local_search(mirp, initial_solution; rng = rng)
+    best_solution = clone_solution(mirp, current_solution)
+    evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
+    no_improvement = 0
+
+    for iteration in 1:params.iterations
+        new_solution = current_solution
+        for _ in 1:params.perturbations
+            new_solution = apply_perturbation(mirp, new_solution; rng = rng)
+        end
+
+        new_solution = local_search(mirp, new_solution; rng = rng)
+
+        if sim_annealing_criterion(new_solution, current_solution, iteration, params, rng)
+            if new_solution.score + EPS < best_solution.score
+                best_solution = clone_solution(mirp, new_solution)
+                evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
+                no_improvement = 0
+            else
                 no_improvement += 1
             end
+
             current_solution = new_solution
-        else
-            # TODO: could increase the no_improvement counter here as well, but not sure if the original paper did it
-        end
-        
-        # When this counter exceeds the allowednumber of non-improving iterations,
-        # the solution is restored, and the counter resets.
-        if no_improvement >= max_no_improvement
-            current_solution = best_solution
-            no_improvement = 0
         end
 
-        # I am just guessing that this needs to be tracked
-        if current_solution.score < best_solution.score
-            best_solution = current_solution
+        if no_improvement >= params.restore_after
+            current_solution = clone_solution(mirp, best_solution)
+            evaluate_solution!(mirp, current_solution; add_final_inventory_cost = true)
+            no_improvement = 0
         end
     end
 

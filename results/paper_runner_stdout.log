@@ -1,0 +1,15 @@
+Running LR1_DR02_VC01_V6a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=33440.17, gap=-1.09%, time=612.66s
+Running LR1_DR02_VC02_V6a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=77626.47, gap=3.53%, time=1296.73s
+Running LR1_DR02_VC03_V7a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=43095.86, gap=6.55%, time=1389.53s
+Running LR1_DR02_VC03_V8a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=43332.15, gap=-0.89%, time=929.97s
+Running LR1_DR02_VC04_V8a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=41062.98, gap=-1.43%, time=2740.89s
+Running LR1_DR02_VC05_V8a, horizon=120, seed=1, N=1000, w=2, q=3, ils_iterations=640
+  ILS cost=36465.26, gap=-0.53%, time=2144.89s
+Wrote results\bs_ils_replication_paper_120_20260601_225418.csv
+Wrote results\bs_ils_replication_gap_paper_120_20260601_225418.svg
+Wrote results\bs_ils_replication_report_paper_120_20260601_225418.md

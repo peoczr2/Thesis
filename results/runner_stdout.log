@@ -1,0 +1,15 @@
+Running LR1_DR02_VC01_V6a, horizon=120, seed=1
+  ILS cost=33440.17, gap=-1.09%, time=347.20s
+Running LR1_DR02_VC02_V6a, horizon=120, seed=1
+  ILS cost=88411.03, gap=17.91%, time=734.67s
+Running LR1_DR02_VC03_V7a, horizon=120, seed=1
+  ILS cost=47354.23, gap=17.08%, time=784.84s
+Running LR1_DR02_VC03_V8a, horizon=120, seed=1
+  ILS cost=327658.42, gap=649.43%, time=129.93s
+Running LR1_DR02_VC04_V8a, horizon=120, seed=1
+  ILS cost=43104.29, gap=3.47%, time=1787.71s
+Running LR1_DR02_VC05_V8a, horizon=120, seed=1
+  ILS cost=41178.13, gap=12.33%, time=1267.46s
+Wrote results\bs_ils_replication_120_20260601_215020.csv
+Wrote results\bs_ils_replication_gap_120_20260601_215020.svg
+Wrote results\bs_ils_replication_report_120_20260601_215020.md
