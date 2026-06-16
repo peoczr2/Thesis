@@ -116,8 +116,9 @@ function is_feasible(node::Solution, port::Port, vessel::Vessel)
 end
 
 function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
-    rate = call.port.rates[period_index(call.port.rates, service_time)]
+    rate = call.port.rates[period_index(call.port.rates, service_time)] # TODO: i guess this calculates the accumulated rate from last service time until the current service time
 
+    # TODO: hmm, it should be empty i think, so maybe if its then have like a run time error or something so that we can catch if there is a bug in inventory tracking
     if call.port.type == :loading
         load_amount = max(0.0, call.vessel.class.capacity - cargo)
         return inventory + rate - load_amount
@@ -127,6 +128,7 @@ function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float
     return inventory - rate + unload_amount
 end
 
+# TODO: i think there is no such a thing as inventory_feasibility, as the heuristic should actively seek a service_time where there is enough inventory or enough free capacity
 function service_is_inventory_feasible(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
     inventory_after = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
     return 0.0 - EPS <= inventory_after <= call.port.capacity + EPS
@@ -207,7 +209,7 @@ function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time
 end
 
 function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
-    new_solution = clone_evaluated_solution(mirp, solution)
+    new_solution = clone_evaluated_solution(mirp, solution) # TODO: check if its a hard copy
     call = Call(port, vessel)
 
     if !is_feasible(new_solution, port, vessel)
@@ -226,6 +228,7 @@ function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vesse
     last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
     arrival = max(1, last_service_time_vessel + vessel.class.travel_times[from_port.id, port_id])
 
+    # TODO: this is not efficient, it should be stored already what is a ports actual berth use at least have efficient jumping call to call and not doing it in O(n) time
     berth_use = Dict{Int64, Int64}()
     for existing_call in new_solution.calls
         if existing_call.port.id == port_id && existing_call.service_time_port > 0
@@ -242,6 +245,7 @@ function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vesse
         time_horizon,
     )
 
+    # TODO: this kind of solution infeasibility does not exist i think, as if the call would happen after the time horizon then just ignore it. But do not make the whole solution infeasible, or maybe name it differently as to signal that the last call can not happen
     if service_time > time_horizon
         push!(new_solution.calls, call)
         new_solution.feasible = false
@@ -477,6 +481,7 @@ function greedy_complete_solution(
 
             # Trial append evaluates only this vessel-port call; the current
             # prefix is kept if the trial cannot be scheduled.
+            # TODO: this is not efficient, though in theory its O(1) as it only evaluates the last call, so maybe it is fine, but make sure that append_evaluated_call should not copy prefix solutions and rather just either return the service time and feasibility or a bigger evaluation object 
             candidate = append_evaluated_call(mirp, solution, port, vessel)
             candidate.feasible || continue
 

@@ -61,6 +61,7 @@ end
 # Evaluate a partial node with one deterministic and q - 1 randomized completions.
 # The node receives the median completion score as its beam priority.
 function evaluate(node::Solution, mirp::MIRP, q::Int64; rng::AbstractRNG = Random.default_rng())
+    # TODO: could be a better data stucture as we will need the median and top x cadidates, while we are adding the elements one by one and not changing them later
     full_solutions = Solution[]
 
     push!(full_solutions, deterministic_eval(node, mirp))
@@ -113,6 +114,7 @@ function expand_node(
         push!(successors, successor)
     end
 
+    # TODO: this could be more efficient with better datastructure
     return keep_best_unique(successors, w), completed_solutions
 end
 
@@ -140,14 +142,14 @@ function beam_search(
         for node in beam_nodes
             node_successors, completed_solutions = expand_node(mirp, node, w, q; rng = rng)
             append!(successors, node_successors)
-            keep_best_N_solutions!(best_solutions, completed_solutions, N)
+            keep_best_N_solutions!(best_solutions, completed_solutions, N) # TODO: this could be more efficient with better datastructure
         end
 
         if isempty(successors)
             break
         end
 
-        beam_nodes = keep_best_N_nodes(successors, N)
+        beam_nodes = keep_best_N_nodes(successors, N) # TODO: this could be more efficient with better datastructure
         levels += 1
     end
 
