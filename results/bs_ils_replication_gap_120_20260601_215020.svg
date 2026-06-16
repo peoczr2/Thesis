@@ -4,22 +4,22 @@
 <line x1="90" y1="195.0" x2="950" y2="195.0" stroke="#444"/>
 <text x="18" y="199.0" font-family="Arial" font-size="12">0%</text>
 <rect x="145.66666666666669" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
-<rect x="177.66666666666669" y="195.0" width="28.0" height="0.24357555847574208" fill="#f58518"/>
+<rect x="177.66666666666669" y="195.0" width="28.0" height="8.832400344223897" fill="#f58518"/>
 <text x="161.66666666666669" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 161.66666666666669,375)">VC01_V6a</text>
 <rect x="289.0" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
-<rect x="321.0" y="191.00126187644113" width="28.0" height="3.9987381235588724" fill="#f58518"/>
+<rect x="321.0" y="50.0" width="28.0" height="145.0" fill="#f58518"/>
 <text x="305.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 305.0,375)">VC02_V6a</text>
-<rect x="432.33333333333337" y="195.0" width="28.0" height="0.058050880133605945" fill="#4c78a8"/>
-<rect x="464.33333333333337" y="191.1864762538261" width="28.0" height="3.8135237461739027" fill="#f58518"/>
+<rect x="432.33333333333337" y="195.0" width="28.0" height="2.1050084699923803" fill="#4c78a8"/>
+<rect x="464.33333333333337" y="56.71613991488863" width="28.0" height="138.28386008511137" fill="#f58518"/>
 <text x="448.33333333333337" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 448.33333333333337,375)">VC03_V7a</text>
 <rect x="575.6666666666667" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
-<rect x="607.6666666666667" y="50.0" width="28.0" height="145.0" fill="#f58518"/>
+<rect x="607.6666666666667" y="189.32634628986628" width="28.0" height="5.67365371013371" fill="#f58518"/>
 <text x="591.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 591.6666666666667,375)">VC03_V8a</text>
-<rect x="719.0" y="194.9732072860922" width="28.0" height="0.02679271390781813" fill="#4c78a8"/>
-<rect x="751.0" y="194.2242836091655" width="28.0" height="0.7757163908344896" fill="#f58518"/>
+<rect x="719.0" y="194.02845762923428" width="28.0" height="0.9715423707657139" fill="#4c78a8"/>
+<rect x="751.0" y="166.87140713008358" width="28.0" height="28.128592869916407" fill="#f58518"/>
 <text x="735.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 735.0,375)">VC04_V8a</text>
-<rect x="862.3333333333334" y="195.0" width="28.0" height="0.07367996324649986" fill="#4c78a8"/>
-<rect x="894.3333333333334" y="192.24761427074404" width="28.0" height="2.752385729255961" fill="#f58518"/>
+<rect x="862.3333333333334" y="195.0" width="28.0" height="2.6717415196057135" fill="#4c78a8"/>
+<rect x="894.3333333333334" y="95.19453177220832" width="28.0" height="99.80546822779168" fill="#f58518"/>
 <text x="878.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 878.3333333333334,375)">VC05_V8a</text>
 <rect x="760" y="42" width="14" height="14" fill="#4c78a8"/><text x="780" y="54" font-family="Arial" font-size="12">Paper best gap</text>
 <rect x="760" y="62" width="14" height="14" fill="#f58518"/><text x="780" y="74" font-family="Arial" font-size="12">Replication gap</text>
