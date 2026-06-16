@@ -106,6 +106,10 @@ function append_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
     return Solution(mirp, calls)
 end
 
+# TODO: check this function
+"""
+Hard copy a solution with rewired internal call links.
+"""
 function clone_evaluated_solution(mirp::MIRP, solution::Solution)
     old_to_new = IdDict{Call, Call}()
     calls = Call[]
