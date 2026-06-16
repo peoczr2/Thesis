@@ -4,6 +4,7 @@ using Random
 using MIRPLib
 
 include("solution_var.jl")
+include("evaluate.jl")
 include("greedy_randomize_algorithm.jl")
 include("beam_search.jl")
 include("neighbourhood.jl")
@@ -18,11 +19,11 @@ const PAPER_TIME_LIMIT_SECONDS = 90_000.0
 # Instance subset requested for the replication run.
 const TARGET_INSTANCES = [
     :LR1_DR02_VC01_V6a,
-    :LR1_DR02_VC02_V6a,
-    :LR1_DR02_VC03_V7a,
+    #:LR1_DR02_VC02_V6a,
+    #:LR1_DR02_VC03_V7a,
     :LR1_DR02_VC03_V8a,
-    :LR1_DR02_VC04_V8a,
-    :LR1_DR02_VC05_V8a,
+    #:LR1_DR02_VC04_V8a,
+    #:LR1_DR02_VC05_V8a,
 ]
 
 # Paper table values used as the reference line in generated reports and plots.

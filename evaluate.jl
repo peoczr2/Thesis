@@ -17,6 +17,14 @@ function violation_price(mirp::MIRP, port::Port, t::Int64)
     return price == 0.0 ? mirp.metadata.spot_market_price : price
 end
 
+function inventory_lower_bound(port::Port)
+    return Float64(port.min_amt)
+end
+
+function inventory_upper_bound(port::Port)
+    return Float64(port.capacity)
+end
+
 function clear_call_state!(call::Call)
     call.last_occ_vessel = nothing
     call.last_occ_port = nothing
@@ -66,17 +74,19 @@ function advance_inventory(mirp::MIRP, port::Port, inventory::Float64, from_t::I
 
         if port.type == :loading
             inventory += rate
-            if inventory > port.capacity
-                excess = inventory - port.capacity
+            upper_bound = inventory_upper_bound(port)
+            if inventory > upper_bound
+                excess = inventory - upper_bound
                 penalty += excess * violation_price(mirp, port, t)
-                inventory = Float64(port.capacity)
+                inventory = upper_bound
             end
         else
             inventory -= rate
-            if inventory < 0.0
-                shortage = -inventory
+            lower_bound = inventory_lower_bound(port)
+            if inventory < lower_bound
+                shortage = lower_bound - inventory
                 penalty += shortage * violation_price(mirp, port, t)
-                inventory = 0.0
+                inventory = lower_bound
             end
         end
     end
@@ -93,7 +103,7 @@ function next_violation_period(port::Port, inventory::Float64, from_t::Int64, ti
         rate = port.rates[period_index(port.rates, t)]
         inventory += port.type == :loading ? rate : -rate
 
-        if inventory > port.capacity || inventory < 0.0
+        if inventory > inventory_upper_bound(port) || inventory < inventory_lower_bound(port)
             return t
         end
     end
@@ -133,7 +143,7 @@ end
 # TODO: i think there is no such a thing as inventory_feasibility, as the heuristic should actively seek a service_time where there is enough inventory or enough free capacity
 function service_is_inventory_feasible(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
     inventory_after = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
-    return 0.0 - EPS <= inventory_after <= call.port.capacity + EPS
+    return inventory_lower_bound(call.port) - EPS <= inventory_after <= inventory_upper_bound(call.port) + EPS
 end
 
 function first_service_time(
@@ -187,18 +197,20 @@ function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time
         inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
         cargo += load_amount
 
-        if inventory < 0.0
-            penalty += -inventory * violation_price(mirp, call.port, service_time)
-            inventory = 0.0
+        lower_bound = inventory_lower_bound(call.port)
+        if inventory < lower_bound
+            penalty += (lower_bound - inventory) * violation_price(mirp, call.port, service_time)
+            inventory = lower_bound
         end
     else
         unload_amount = cargo
         inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
         cargo = 0.0
 
-        if inventory > call.port.capacity
-            penalty += (inventory - call.port.capacity) * violation_price(mirp, call.port, service_time)
-            inventory = Float64(call.port.capacity)
+        upper_bound = inventory_upper_bound(call.port)
+        if inventory > upper_bound
+            penalty += (inventory - upper_bound) * violation_price(mirp, call.port, service_time)
+            inventory = upper_bound
         end
     end
 
