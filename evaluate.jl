@@ -117,12 +117,26 @@ function is_feasible(node::Solution, port::Port, vessel::Vessel)
     return last_port.type != port.type
 end
 
-function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
-    rate = call.port.rates[period_index(call.port.rates, service_time)] # TODO: i guess this calculates the accumulated rate from last service time until the current service time
+struct AppendCandidate
+    port::Port
+    vessel::Vessel
+    service_time::Int64
+    vessels_in_port::Int64
+end
+
+function inventory_after_service_period(
+    mirp::MIRP,
+    port::Port,
+    vessel::Vessel,
+    inventory::Float64,
+    cargo::Float64,
+    service_time::Int64,
+)
+    rate = port.rates[period_index(port.rates, service_time)] # TODO: i guess this calculates the accumulated rate from last service time until the current service time
 
     # TODO: hmm, it should be empty i think, so maybe if its then have like a run time error or something so that we can catch if there is a bug in inventory tracking
-    if call.port.type == :loading
-        load_amount = max(0.0, call.vessel.class.capacity - cargo)
+    if port.type == :loading
+        load_amount = max(0.0, vessel.class.capacity - cargo)
         return inventory + rate - load_amount
     end
 
@@ -130,10 +144,54 @@ function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float
     return inventory - rate + unload_amount
 end
 
+function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
+    return inventory_after_service_period(mirp, call.port, call.vessel, inventory, cargo, service_time)
+end
+
 # TODO: i think there is no such a thing as inventory_feasibility, as the heuristic should actively seek a service_time where there is enough inventory or enough free capacity
+function service_is_inventory_feasible(
+    mirp::MIRP,
+    port::Port,
+    vessel::Vessel,
+    inventory::Float64,
+    cargo::Float64,
+    service_time::Int64,
+)
+    inventory_after = inventory_after_service_period(mirp, port, vessel, inventory, cargo, service_time)
+    return 0.0 - EPS <= inventory_after <= port.capacity + EPS
+end
+
 function service_is_inventory_feasible(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
-    inventory_after = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
-    return 0.0 - EPS <= inventory_after <= call.port.capacity + EPS
+    return service_is_inventory_feasible(mirp, call.port, call.vessel, inventory, cargo, service_time)
+end
+
+function first_service_time(
+    mirp::MIRP,
+    solution::Solution,
+    port::Port,
+    vessel::Vessel,
+    berth_use::Dict{Int64, Int64},
+    arrival::Int64,
+    time_horizon::Int64,
+)
+    port_id = port.id
+    inventory_start = solution.port_inventory[port_id]
+    from_t = solution.port_time[port_id]
+    cargo = solution.vessel_inventory[vessel.id]
+
+    for t in max(1, arrival):time_horizon
+        vessels_in_port = get(berth_use, t, 0)
+        if vessels_in_port >= port.berth_limit
+            continue
+        end
+
+        inventory_at_t, _ = advance_inventory(mirp, port, inventory_start, from_t, t - 1)
+        if service_is_inventory_feasible(mirp, port, vessel, inventory_at_t, cargo, t)
+            return t, vessels_in_port + 1
+        end
+    end
+
+    return time_horizon + 1, 0
 end
 
 function first_service_time(
@@ -144,24 +202,7 @@ function first_service_time(
     arrival::Int64,
     time_horizon::Int64,
 )
-    port_id = call.port.id
-    inventory_start = solution.port_inventory[port_id]
-    from_t = solution.port_time[port_id]
-    cargo = solution.vessel_inventory[call.vessel.id]
-
-    for t in max(1, arrival):time_horizon
-        vessels_in_port = get(berth_use, t, 0)
-        if vessels_in_port >= call.port.berth_limit
-            continue
-        end
-
-        inventory_at_t, _ = advance_inventory(mirp, call.port, inventory_start, from_t, t - 1)
-        if service_is_inventory_feasible(mirp, call, inventory_at_t, cargo, t)
-            return t, vessels_in_port + 1
-        end
-    end
-
-    return time_horizon + 1, 0
+    return first_service_time(mirp, solution, call.port, call.vessel, berth_use, arrival, time_horizon)
 end
 
 # TODO: check this
@@ -220,70 +261,85 @@ function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time
     return penalty
 end
 
-"""
-Appends a call to a solutions hard copy and evaluate this new solution efficently. Maybe return nothing if the call is not feasible
-"""
-function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
-    new_solution = clone_evaluated_solution(mirp, solution) # TODO: check if its a hard copy
-    call = Call(port, vessel)
-
-    # TODO: in theory this should not happen, and maybe use throwing an error if for some reason it does, or return nothing or false
-    if !is_feasible(new_solution, port, vessel)
-        push!(new_solution.calls, call)
-        new_solution.feasible = false
-        new_solution.score = Inf
-        return new_solution
+function berth_use_for_port(solution::Solution, port_id::Int64)
+    berth_use = Dict{Int64, Int64}()
+    for existing_call in solution.calls
+        if existing_call.port.id == port_id && existing_call.service_time_port > 0
+            service_time = existing_call.service_time_port
+            berth_use[service_time] = get(berth_use, service_time, 0) + 1
+        end
     end
+
+    return berth_use
+end
+
+function candidate_append(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
+    return candidate_append(mirp, solution, port, vessel, berth_use_for_port(solution, port.id))
+end
+
+function candidate_append(
+    mirp::MIRP,
+    solution::Solution,
+    port::Port,
+    vessel::Vessel,
+    berth_use::Dict{Int64, Int64},
+)
+    is_feasible(solution, port, vessel) || return nothing
 
     time_horizon = horizon(mirp)
     port_id = port.id
     vessel_id = vessel.id
-    last_occ_vessel = new_solution.last_occ_vessels[vessel_id]
-    last_occ_port = new_solution.last_occ_ports[port_id]
+    last_occ_vessel = solution.last_occ_vessels[vessel_id]
     from_port = last_occ_vessel === nothing ? vessel.initial_port : last_occ_vessel.port
     last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
     arrival = max(1, last_service_time_vessel + vessel.class.travel_times[from_port.id, port_id])
 
-    # TODO: this is not efficient, it should be stored already what is a ports actual berth use at least have efficient jumping call to call and not doing it in O(n) time
-    berth_use = Dict{Int64, Int64}()
-    for existing_call in new_solution.calls
-        if existing_call.port.id == port_id && existing_call.service_time_port > 0
-            berth_use[existing_call.service_time_port] = get(berth_use, existing_call.service_time_port, 0) + 1
-        end
-    end
-
     service_time, vessels_in_port = first_service_time(
         mirp,
-        new_solution,
-        call,
+        solution,
+        port,
+        vessel,
         berth_use,
         arrival,
         time_horizon,
     )
 
-    # TODO: this kind of solution infeasibility does not exist i think, as if the call would happen after the time horizon then just ignore it. But do not make the whole solution infeasible, or maybe name it differently as to signal that the last call can not happen
-    if service_time > time_horizon
-        push!(new_solution.calls, call)
-        new_solution.feasible = false
-        new_solution.score = Inf
-        return new_solution
-    end
+    service_time > time_horizon && return nothing
+    return AppendCandidate(port, vessel, service_time, vessels_in_port)
+end
 
-    routing_cost = isempty(new_solution.calls) ? 0.0 : new_solution.calls[end].acc_routing_costs # TODO: maybe it could accept that its initialized with 0.0
-    inventory_cost = isempty(new_solution.calls) ? 0.0 : new_solution.calls[end].acc_inventory_costs
+"""
+Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place.
+"""
+function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::AppendCandidate)
+    port = candidate.port
+    vessel = candidate.vessel
+    call = Call(port, vessel)
+    time_horizon = horizon(mirp)
+    port_id = port.id
+    vessel_id = vessel.id
+    last_occ_vessel = solution.last_occ_vessels[vessel_id]
+    last_occ_port = solution.last_occ_ports[port_id]
+    from_port = last_occ_vessel === nothing ? vessel.initial_port : last_occ_vessel.port
+    last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
+    service_time = candidate.service_time
+    vessels_in_port = candidate.vessels_in_port
+
+    routing_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_routing_costs # TODO: maybe it could accept that its initialized with 0.0
+    inventory_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_inventory_costs
     inventory, penalty = advance_inventory(
         mirp,
         port,
-        new_solution.port_inventory[port_id],
-        new_solution.port_time[port_id],
+        solution.port_inventory[port_id],
+        solution.port_time[port_id],
         service_time - 1,
     )
-    new_solution.port_inventory[port_id] = inventory
+    solution.port_inventory[port_id] = inventory
     inventory_cost += penalty
 
-    cargo_before = new_solution.vessel_inventory[vessel_id]
+    cargo_before = solution.vessel_inventory[vessel_id]
     routing_cost += route_cost(mirp, vessel, from_port, port, cargo_before)
-    inventory_cost += apply_service!(mirp, new_solution, call, service_time)
+    inventory_cost += apply_service!(mirp, solution, call, service_time)
 
     call.last_occ_vessel = last_occ_vessel
     call.last_occ_port = last_occ_port
@@ -297,21 +353,39 @@ function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vesse
     call.last_service_time_vessel = last_service_time_vessel
     call.service_time_port = service_time
     call.num_vessels_in_port = vessels_in_port
-    call.inventory_level = new_solution.port_inventory[port_id]
+    call.inventory_level = solution.port_inventory[port_id]
     call.next_violation_time = next_violation_period(port, call.inventory_level, service_time, time_horizon)
-    new_solution.port_next_violation[port_id] = call.next_violation_time
+    solution.port_next_violation[port_id] = call.next_violation_time
     call.acc_routing_costs = routing_cost
     call.acc_inventory_costs = inventory_cost
     call.acc_total_costs = routing_cost + inventory_cost
 
-    push!(new_solution.calls, call)
-    new_solution.last_occ_ports[port_id] = call
-    new_solution.last_occ_vessels[vessel_id] = call
-    new_solution.port_time[port_id] = service_time
-    new_solution.vessel_time[vessel_id] = service_time
-    new_solution.score = routing_cost + inventory_cost
-    new_solution.feasible = true
-    return new_solution
+    push!(solution.calls, call)
+    solution.last_occ_ports[port_id] = call
+    solution.last_occ_vessels[vessel_id] = call
+    solution.port_time[port_id] = service_time
+    solution.vessel_time[vessel_id] = service_time
+    solution.score = routing_cost + inventory_cost
+    solution.feasible = true
+    return solution
+end
+
+"""
+Appends a call to a solution hard copy and evaluates this new solution efficiently.
+"""
+function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
+    new_solution = clone_evaluated_solution(mirp, solution)
+    candidate = candidate_append(mirp, new_solution, port, vessel)
+
+    if candidate === nothing
+        call = Call(port, vessel)
+        push!(new_solution.calls, call)
+        new_solution.feasible = false
+        new_solution.score = Inf
+        return new_solution
+    end
+
+    return append_evaluated_call!(mirp, new_solution, candidate)
 end
 
 function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_cost::Bool = true)
