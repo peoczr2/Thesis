@@ -142,6 +142,8 @@ function greedy_complete_solution(
         inventory_cost += penalty
     end
 
+    routing_cost -= early_finish_reward(mirp, solution)
+
     solution.score = routing_cost + inventory_cost
     solution.feasible = true
     return solution

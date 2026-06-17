@@ -175,6 +175,19 @@ function route_cost(mirp::MIRP, vessel::Vessel, from_port::Port, to_port::Port, 
     return travel_cost + to_port.fee
 end
 
+function early_finish_reward(mirp::MIRP, solution::Solution)
+    time_horizon = horizon(mirp)
+    reward = 0.0
+
+    for vessel in mirp.vessels
+        last_call = solution.last_occ_vessels[vessel.id]
+        finish_time = last_call === nothing ? vessel.first_time : last_call.service_time_port
+        reward += mirp.metadata.reward_finishing_early * max(0, time_horizon - finish_time)
+    end
+
+    return reward
+end
+
 function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time::Int64)
     port_id = call.port.id
     vessel_id = call.vessel.id
@@ -392,6 +405,8 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
             solution.port_next_violation[port.id] = time_horizon + 1
             inventory_cost += penalty
         end
+
+        routing_cost -= early_finish_reward(mirp, solution)
     end
 
     solution.score = routing_cost + inventory_cost
