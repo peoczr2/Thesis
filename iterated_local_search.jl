@@ -41,8 +41,9 @@ function iterated_local_search(
     initial_solution::Solution;
     rng::AbstractRNG = Random.default_rng(),
     params::ILSParameters = PAPER_ILS_PARAMETERS,
+    randomize::Bool = true,
 )
-    current_solution = local_search(mirp, initial_solution; rng = rng)
+    current_solution = local_search(mirp, initial_solution; rng = rng, randomize = randomize)
     best_solution = clone_solution(mirp, current_solution)
     evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
     no_improvement = 0
@@ -50,10 +51,10 @@ function iterated_local_search(
     for iteration in 1:params.iterations
         new_solution = current_solution
         for _ in 1:params.perturbations
-            new_solution = apply_perturbation(mirp, new_solution; rng = rng)
+            new_solution = apply_perturbation(mirp, new_solution; rng = rng, randomize = randomize)
         end
 
-        new_solution = local_search(mirp, new_solution; rng = rng)
+        new_solution = local_search(mirp, new_solution; rng = rng, randomize = randomize)
 
         if sim_annealing_criterion(new_solution, current_solution, iteration, params, rng)
             if new_solution.score + EPS < best_solution.score
