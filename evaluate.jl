@@ -166,13 +166,13 @@ end
 
 # TODO: check this
 function route_cost(mirp::MIRP, vessel::Vessel, from_port::Port, to_port::Port, cargo_before::Float64)
-    cost = mirp.distances[from_port.id, to_port.id] * vessel.class.travel_cost_km + to_port.fee
+    travel_cost = mirp.distances[from_port.id, to_port.id] * vessel.class.travel_cost_km
 
     if from_port.type == :unloading && to_port.type == :loading && cargo_before <= EPS
-        cost *= max(0.0, 1.0 - vessel.class.discount_empty)
+        travel_cost *= max(0.0, 1.0 - vessel.class.discount_empty)
     end
 
-    return cost
+    return travel_cost + to_port.fee
 end
 
 function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time::Int64)

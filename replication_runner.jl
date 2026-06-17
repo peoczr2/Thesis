@@ -4,6 +4,7 @@ using Random
 using MIRPLib
 
 include("solution_var.jl")
+include("evaluate.jl")
 include("greedy_randomize_algorithm.jl")
 include("beam_search.jl")
 include("neighbourhood.jl")
