@@ -6,15 +6,6 @@ const NEIGHBORHOODS = [:swap, :relocate, :replace, :insert, :remove, :swap_port]
 const neigbourhoods = NEIGHBORHOODS
 const neighborhoods = NEIGHBORHOODS
 
-function evaluated_neighbor(mirp::MIRP, calls::Vector{Call})
-    return evaluate_solution!(mirp, Solution(mirp, calls); add_final_inventory_cost = true)
-end
-
-function feasible_neighbor(mirp::MIRP, calls::Vector{Call})
-    solution = evaluated_neighbor(mirp, calls)
-    return solution.feasible && isfinite(solution.score) ? solution : nothing
-end
-
 function ordered_indices(rng::AbstractRNG, n::Int64, randomize::Bool)
     return randomize ? randperm(rng, n) : Base.OneTo(n)
 end
@@ -42,9 +33,7 @@ function swap_neighbor(
         for j in ordered_indices(rng, n, randomize)
             i < j || continue
 
-            calls = copy_calls(solution.calls)
-            calls[i], calls[j] = calls[j], calls[i]
-            candidate = accepted_neighbor(feasible_neighbor(mirp, calls), current_score)
+            candidate = accepted_neighbor(evaluate_swap(mirp, solution, i, j), current_score)
             candidate !== nothing && return candidate
         end
     end
@@ -65,10 +54,7 @@ function relocate_neighbor(
         for j in ordered_indices(rng, n, randomize)
             i == j && continue
 
-            calls = copy_calls(solution.calls)
-            call = splice!(calls, i)
-            insert!(calls, j, call)
-            candidate = accepted_neighbor(feasible_neighbor(mirp, calls), current_score)
+            candidate = accepted_neighbor(evaluate_relocate(mirp, solution, i, j), current_score)
             candidate !== nothing && return candidate
         end
     end
@@ -91,9 +77,7 @@ function replace_neighbor(
                 continue
             end
 
-            calls = copy_calls(solution.calls)
-            calls[i] = Call(port, call.vessel)
-            candidate = accepted_neighbor(feasible_neighbor(mirp, calls), current_score)
+            candidate = accepted_neighbor(evaluate_replace(mirp, solution, i, port), current_score)
             candidate !== nothing && return candidate
         end
     end
@@ -109,26 +93,19 @@ function insert_neighbor(
     rng::AbstractRNG = Random.default_rng(),
     randomize::Bool = true,
 )
-    base = evaluate_solution!(mirp, clone_solution(mirp, solution); add_final_inventory_cost = false)
-    !base.feasible && return nothing
+    base = clone_evaluated_prefix(mirp, solution, length(solution.calls))
+    berth_use = berth_use_by_port(mirp, base)
 
     for first_port in ordered_items(rng, mirp.ports, randomize)
         for vessel in ordered_items(rng, mirp.vessels, randomize)
             is_feasible(base, first_port, vessel) || continue
-
-            one_call = append_call(mirp, base, first_port, vessel)
-            evaluate_solution!(mirp, one_call; add_final_inventory_cost = false)
-            !one_call.feasible && continue
+            candidate_append(mirp, base, first_port, vessel, berth_use[first_port.id]) === nothing && continue
 
             for port in ordered_items(rng, mirp.ports, randomize)
                 port.type == first_port.type && continue
 
-                two_calls = append_call(mirp, one_call, port, vessel)
-                candidate = evaluate_solution!(mirp, two_calls; add_final_inventory_cost = true)
-                if candidate.feasible && isfinite(candidate.score)
-                    candidate = accepted_neighbor(candidate, current_score)
-                    candidate !== nothing && return candidate
-                end
+                candidate = accepted_neighbor(evaluate_insert(mirp, solution, first_port, vessel, port), current_score)
+                candidate !== nothing && return candidate
             end
         end
     end
@@ -158,16 +135,8 @@ function remove_neighbor(
     n = length(solution.calls)
 
     for i in ordered_indices(rng, n, randomize)
-        remove_indexes = [i]
         j = next_same_vessel_index(solution.calls, i)
-        j !== nothing && push!(remove_indexes, j)
-
-        calls = Call[]
-        for (k, call) in enumerate(solution.calls)
-            k in remove_indexes || push!(calls, copy_call(call))
-        end
-
-        candidate = accepted_neighbor(feasible_neighbor(mirp, calls), current_score)
+        candidate = accepted_neighbor(evaluate_remove(mirp, solution, i, j), current_score)
         candidate !== nothing && return candidate
     end
 
@@ -194,10 +163,7 @@ function swap_port_neighbor(
                 continue
             end
 
-            calls = copy_calls(solution.calls)
-            calls[i] = Call(call_j.port, call_i.vessel)
-            calls[j] = Call(call_i.port, call_j.vessel)
-            candidate = accepted_neighbor(feasible_neighbor(mirp, calls), current_score)
+            candidate = accepted_neighbor(evaluate_swap_port(mirp, solution, i, j), current_score)
             candidate !== nothing && return candidate
         end
     end
@@ -213,18 +179,20 @@ function neighborhood_neighbor(
     rng::AbstractRNG = Random.default_rng(),
     randomize::Bool = true,
 )
+    source_solution = neighbor_source_solution(mirp, solution)
+
     if neighborhood == :swap
-        return swap_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return swap_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :relocate
-        return relocate_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return relocate_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :replace
-        return replace_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return replace_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :insert
-        return insert_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return insert_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :remove
-        return remove_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return remove_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :swap_port
-        return swap_port_neighbor(mirp, solution, current_score; rng = rng, randomize = randomize)
+        return swap_port_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     end
 
     throw(ArgumentError("Unknown neighborhood: $(neighborhood)"))
