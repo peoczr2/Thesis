@@ -58,6 +58,7 @@ function iterated_local_search(
 
         if sim_annealing_criterion(new_solution, current_solution, iteration, params, rng)
             if new_solution.score + EPS < best_solution.score
+                # TODO: is this even neccessary?
                 best_solution = clone_solution(mirp, new_solution)
                 evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
                 no_improvement = 0
@@ -69,6 +70,7 @@ function iterated_local_search(
         end
 
         if no_improvement >= params.restore_after
+            # TODO: is this even neccessary?
             current_solution = clone_solution(mirp, best_solution)
             evaluate_solution!(mirp, current_solution; add_final_inventory_cost = true)
             no_improvement = 0

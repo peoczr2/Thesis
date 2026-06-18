@@ -115,6 +115,7 @@ end
 
 function next_same_vessel_index(calls::Vector{Call}, start_index::Int64)
     vessel_id = calls[start_index].vessel.id
+    # TODO: i think calls store the next vessel call
     for j in (start_index + 1):length(calls)
         if calls[j].vessel.id == vessel_id
             return j

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490.0" y="24" text-anchor="middle" font-family="Arial" font-size="18">Replication gap vs paper best gap</text>
+<line x1="90" y1="195.0" x2="950" y2="195.0" stroke="#444"/>
+<text x="18" y="199.0" font-family="Arial" font-size="12">0%</text>
+<rect x="98.75" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="109.91666666666666" y="195.0" width="7.166666666666667" height="0.003510100014003149" fill="#f58518"/>
+<text x="104.33333333333333" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 104.33333333333333,375)">VC01_V6a</text>
+<rect x="127.41666666666667" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="138.58333333333334" y="195.0" width="7.166666666666667" height="0.0028562065694352308" fill="#f58518"/>
+<text x="133.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 133.0,375)">VC01_V6a</text>
+<rect x="156.08333333333334" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="167.25000000000003" y="195.0" width="7.166666666666667" height="0.0028562065694352308" fill="#f58518"/>
+<text x="161.66666666666669" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 161.66666666666669,375)">VC01_V6a</text>
+<rect x="184.75" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="195.91666666666669" y="195.0" width="7.166666666666667" height="0.003510100014003149" fill="#f58518"/>
+<text x="190.33333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 190.33333333333334,375)">VC01_V6a</text>
+<rect x="213.41666666666666" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="224.58333333333334" y="195.0" width="7.166666666666667" height="0.0028562065694352308" fill="#f58518"/>
+<text x="219.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 219.0,375)">VC01_V6a</text>
+<rect x="242.08333333333334" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="253.25000000000003" y="104.48267025279985" width="7.166666666666667" height="90.51732974720015" fill="#f58518"/>
+<text x="247.66666666666669" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 247.66666666666669,375)">VC02_V6a</text>
+<rect x="270.75000000000006" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="281.9166666666667" y="104.48267025279985" width="7.166666666666667" height="90.51732974720015" fill="#f58518"/>
+<text x="276.33333333333337" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 276.33333333333337,375)">VC02_V6a</text>
+<rect x="299.4166666666667" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="310.5833333333333" y="104.48267025279985" width="7.166666666666667" height="90.51732974720015" fill="#f58518"/>
+<text x="305.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 305.0,375)">VC02_V6a</text>
+<rect x="328.08333333333337" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="339.25" y="104.48267025279985" width="7.166666666666667" height="90.51732974720015" fill="#f58518"/>
+<text x="333.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 333.6666666666667,375)">VC02_V6a</text>
+<rect x="356.75000000000006" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="367.9166666666667" y="104.48267025280028" width="7.166666666666667" height="90.51732974719972" fill="#f58518"/>
+<text x="362.33333333333337" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 362.33333333333337,375)">VC02_V6a</text>
+<rect x="385.4166666666667" y="195.0" width="7.166666666666667" height="5.74794570453432" fill="#4c78a8"/>
+<rect x="396.5833333333333" y="82.55124925485252" width="7.166666666666667" height="112.44875074514748" fill="#f58518"/>
+<text x="391.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 391.0,375)">VC03_V7a</text>
+<rect x="414.08333333333337" y="195.0" width="7.166666666666667" height="5.74794570453432" fill="#4c78a8"/>
+<rect x="425.25" y="161.65395783756398" width="7.166666666666667" height="33.34604216243602" fill="#f58518"/>
+<text x="419.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 419.6666666666667,375)">VC03_V7a</text>
+<rect x="442.75000000000006" y="195.0" width="7.166666666666667" height="5.74794570453432" fill="#4c78a8"/>
+<rect x="453.9166666666667" y="98.94502329279989" width="7.166666666666667" height="96.05497670720011" fill="#f58518"/>
+<text x="448.33333333333337" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 448.33333333333337,375)">VC03_V7a</text>
+<rect x="471.4166666666667" y="195.0" width="7.166666666666667" height="5.74794570453432" fill="#4c78a8"/>
+<rect x="482.5833333333333" y="162.26145121591267" width="7.166666666666667" height="32.738548784087335" fill="#f58518"/>
+<text x="477.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 477.0,375)">VC03_V7a</text>
+<rect x="500.08333333333337" y="195.0" width="7.166666666666667" height="5.74794570453432" fill="#4c78a8"/>
+<rect x="511.25" y="162.12683049218197" width="7.166666666666667" height="32.87316950781802" fill="#f58518"/>
+<text x="505.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 505.6666666666667,375)">VC03_V7a</text>
+<rect x="528.75" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="539.9166666666667" y="182.51003961194226" width="7.166666666666667" height="12.489960388057733" fill="#f58518"/>
+<text x="534.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 534.3333333333334,375)">VC03_V8a</text>
+<rect x="557.4166666666666" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="568.5833333333334" y="71.7315915367519" width="7.166666666666667" height="123.2684084632481" fill="#f58518"/>
+<text x="563.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 563.0,375)">VC03_V8a</text>
+<rect x="586.0833333333334" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="597.2500000000001" y="192.38915904146225" width="7.166666666666667" height="2.610840958537761" fill="#f58518"/>
+<text x="591.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 591.6666666666667,375)">VC03_V8a</text>
+<rect x="614.75" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="625.9166666666667" y="182.51003961194226" width="7.166666666666667" height="12.489960388057733" fill="#f58518"/>
+<text x="620.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 620.3333333333334,375)">VC03_V8a</text>
+<rect x="643.4166666666666" y="195.0" width="7.166666666666667" height="0.0" fill="#4c78a8"/>
+<rect x="654.5833333333334" y="50.0" width="7.166666666666667" height="145.0" fill="#f58518"/>
+<text x="649.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 649.0,375)">VC03_V8a</text>
+<rect x="672.0833333333334" y="192.34710198252262" width="7.166666666666667" height="2.652898017477378" fill="#4c78a8"/>
+<rect x="683.2500000000001" y="179.44723714726703" width="7.166666666666667" height="15.552762852732966" fill="#f58518"/>
+<text x="677.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 677.6666666666667,375)">VC04_V8a</text>
+<rect x="700.75" y="192.34710198252262" width="7.166666666666667" height="2.652898017477378" fill="#4c78a8"/>
+<rect x="711.9166666666667" y="192.25687933479625" width="7.166666666666667" height="2.7431206652037603" fill="#f58518"/>
+<text x="706.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 706.3333333333334,375)">VC04_V8a</text>
+<rect x="729.4166666666666" y="192.34710198252262" width="7.166666666666667" height="2.652898017477378" fill="#4c78a8"/>
+<rect x="740.5833333333334" y="192.25953284842942" width="7.166666666666667" height="2.7404671515705794" fill="#f58518"/>
+<text x="735.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 735.0,375)">VC04_V8a</text>
+<rect x="758.0833333333334" y="192.34710198252262" width="7.166666666666667" height="2.652898017477378" fill="#4c78a8"/>
+<rect x="769.2500000000001" y="179.44723714726666" width="7.166666666666667" height="15.552762852733352" fill="#f58518"/>
+<text x="763.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 763.6666666666667,375)">VC04_V8a</text>
+<rect x="786.75" y="192.34710198252262" width="7.166666666666667" height="2.652898017477378" fill="#4c78a8"/>
+<rect x="797.9166666666667" y="188.70177734185265" width="7.166666666666667" height="6.298222658147343" fill="#f58518"/>
+<text x="792.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 792.3333333333334,375)">VC04_V8a</text>
+<rect x="815.4166666666666" y="195.0" width="7.166666666666667" height="7.295469548062791" fill="#4c78a8"/>
+<rect x="826.5833333333334" y="188.4548826479412" width="7.166666666666667" height="6.5451173520587975" fill="#f58518"/>
+<text x="821.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 821.0,375)">VC05_V8a</text>
+<rect x="844.0833333333334" y="195.0" width="7.166666666666667" height="7.295469548062791" fill="#4c78a8"/>
+<rect x="855.2500000000001" y="193.28126850500252" width="7.166666666666667" height="1.718731494997489" fill="#f58518"/>
+<text x="849.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 849.6666666666667,375)">VC05_V8a</text>
+<rect x="872.75" y="195.0" width="7.166666666666667" height="7.295469548062791" fill="#4c78a8"/>
+<rect x="883.9166666666667" y="193.2824746199252" width="7.166666666666667" height="1.7175253800747992" fill="#f58518"/>
+<text x="878.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 878.3333333333334,375)">VC05_V8a</text>
+<rect x="901.4166666666666" y="195.0" width="7.166666666666667" height="7.295469548062791" fill="#4c78a8"/>
+<rect x="912.5833333333334" y="193.28126850500206" width="7.166666666666667" height="1.7187314949979278" fill="#f58518"/>
+<text x="907.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 907.0,375)">VC05_V8a</text>
+<rect x="930.0833333333334" y="195.0" width="7.166666666666667" height="7.295469548062791" fill="#4c78a8"/>
+<rect x="941.2500000000001" y="193.28126850500206" width="7.166666666666667" height="1.7187314949979278" fill="#f58518"/>
+<text x="935.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 935.6666666666667,375)">VC05_V8a</text>
+<rect x="760" y="42" width="14" height="14" fill="#4c78a8"/><text x="780" y="54" font-family="Arial" font-size="12">Paper best gap</text>
+<rect x="760" y="62" width="14" height="14" fill="#f58518"/><text x="780" y="74" font-family="Arial" font-size="12">Replication gap</text>
+</svg>
