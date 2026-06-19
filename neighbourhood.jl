@@ -2,7 +2,7 @@
 using Random
 
 # Neighborhoods used by RVND and by the ILS perturbation step.
-const NEIGHBORHOODS = [:swap, :relocate, :replace, :insert, :remove, :swap_port]
+const NEIGHBORHOODS = [:swap, :relocate, :replace, :insert, :wait, :remove, :swap_port]
 const neigbourhoods = NEIGHBORHOODS
 const neighborhoods = NEIGHBORHOODS
 
@@ -144,6 +144,29 @@ function remove_neighbor(
     return nothing
 end
 
+# Set an extra service delay on an existing call.
+function wait_neighbor(
+    mirp::MIRP,
+    solution::Solution,
+    current_score::Union{Nothing, Float64} = nothing;
+    rng::AbstractRNG = Random.default_rng(),
+    randomize::Bool = true,
+)
+    delay_options = [0; collect(WAIT_PERIODS)]
+
+    for index in ordered_indices(rng, length(solution.calls), randomize)
+        for wait_periods in ordered_items(rng, delay_options, randomize)
+            candidate = accepted_neighbor(
+                evaluate_set_wait(mirp, solution, index, wait_periods),
+                current_score,
+            )
+            candidate !== nothing && return candidate
+        end
+    end
+
+    return nothing
+end
+
 # Swap compatible ports between two calls while keeping the assigned vessels.
 function swap_port_neighbor(
     mirp::MIRP,
@@ -190,6 +213,8 @@ function neighborhood_neighbor(
         return replace_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :insert
         return insert_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
+    elseif neighborhood == :wait
+        return wait_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :remove
         return remove_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)
     elseif neighborhood == :swap_port

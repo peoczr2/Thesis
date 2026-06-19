@@ -33,23 +33,25 @@ function clone_evaluated_prefix(mirp::MIRP, solution::Solution, prefix_length::I
 
     for old_call in @view solution.calls[1:prefix_length]
         call = copy_evaluated_call(old_call)
-        port_id = call.port.id
         vessel_id = call.vessel.id
 
-        call.last_occ_port = last_occ_ports[port_id]
         call.last_occ_vessel = last_occ_vessels[vessel_id]
-        if call.last_occ_port !== nothing
-            call.last_occ_port.next_occ_port = call
-        end
         if call.last_occ_vessel !== nothing
             call.last_occ_vessel.next_occ_vessel = call
         end
 
         push!(calls, call)
-        last_occ_ports[port_id] = call
         last_occ_vessels[vessel_id] = call
-        vessel_inventory[vessel_id] = cargo_after_call(call)
         vessel_time[vessel_id] = call.service_time_port
+
+        port_id = call.port.id
+        call.last_occ_port = last_occ_ports[port_id]
+        if call.last_occ_port !== nothing
+            call.last_occ_port.next_occ_port = call
+        end
+
+        last_occ_ports[port_id] = call
+        vessel_inventory[vessel_id] = cargo_after_call(call)
         port_inventory[port_id] = call.inventory_level
         port_time[port_id] = call.service_time_port
         port_next_violation[port_id] = call.next_violation_time
@@ -84,7 +86,14 @@ end
 
 function append_replayed_call!(mirp::MIRP, solution::Solution, call::Call, berth_use)
     port_id = call.port.id
-    candidate = candidate_append(mirp, solution, call.port, call.vessel, berth_use[port_id])
+    candidate = candidate_append(
+        mirp,
+        solution,
+        call.port,
+        call.vessel,
+        berth_use[port_id];
+        wait_periods = call.wait_periods,
+    )
     if candidate === nothing
         solution.feasible = false
         solution.score = Inf
@@ -175,11 +184,12 @@ function evaluate_relocate(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
 end
 
 function evaluate_replace(mirp::MIRP, solution::Solution, i::Int64, port::Port)
+    old_call = solution.calls[i]
+
     prefix_length = i - 1
     suffix = Call[]
     sizehint!(suffix, length(solution.calls) - prefix_length)
-    old_call = solution.calls[i]
-    push!(suffix, Call(port, old_call.vessel))
+    push!(suffix, Call(port, old_call.vessel, old_call.wait_periods))
 
     for k in (i + 1):length(solution.calls)
         push!(suffix, solution.calls[k])
@@ -191,6 +201,22 @@ end
 function evaluate_insert(mirp::MIRP, solution::Solution, first_port::Port, vessel::Vessel, second_port::Port)
     prefix_length = length(solution.calls)
     suffix = [Call(first_port, vessel), Call(second_port, vessel)]
+    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
+end
+
+function evaluate_set_wait(mirp::MIRP, solution::Solution, index::Int64, wait_periods::Int64)
+    old_call = solution.calls[index]
+    old_call.wait_periods == wait_periods && return nothing
+
+    prefix_length = index - 1
+    suffix = Call[]
+    sizehint!(suffix, length(solution.calls) - prefix_length)
+    push!(suffix, Call(old_call.port, old_call.vessel, wait_periods))
+
+    for k in (index + 1):length(solution.calls)
+        push!(suffix, solution.calls[k])
+    end
+
     return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
 end
 
@@ -210,17 +236,18 @@ function evaluate_remove(mirp::MIRP, solution::Solution, first_index::Int64, sec
 end
 
 function evaluate_swap_port(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
-    prefix_length = i - 1
-    suffix = Call[]
-    sizehint!(suffix, length(solution.calls) - prefix_length)
     call_i = solution.calls[i]
     call_j = solution.calls[j]
 
+    prefix_length = i - 1
+    suffix = Call[]
+    sizehint!(suffix, length(solution.calls) - prefix_length)
+
     for k in i:length(solution.calls)
         if k == i
-            push!(suffix, Call(call_j.port, call_i.vessel))
+            push!(suffix, Call(call_j.port, call_i.vessel, call_i.wait_periods))
         elseif k == j
-            push!(suffix, Call(call_i.port, call_j.vessel))
+            push!(suffix, Call(call_i.port, call_j.vessel, call_j.wait_periods))
         else
             push!(suffix, solution.calls[k])
         end

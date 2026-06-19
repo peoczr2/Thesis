@@ -1,6 +1,10 @@
 using MIRPLib
 
-# A call is the atomic routing decision: one vessel visiting one port.
+# Bounded extra service delays applied after a call's earliest feasible service time.
+const WAIT_PERIODS = 1:10
+
+# A call is the atomic routing decision: one vessel visiting one port. The
+# wait_periods field is an optional service delay, not a separate route step.
 # Evaluation also stores predecessor/successor links and cumulative costs here.
 mutable struct Call
     port::Port
@@ -19,6 +23,7 @@ mutable struct Call
     acc_routing_costs::Float64
     acc_inventory_costs::Float64
     acc_total_costs::Float64
+    wait_periods::Int64
 end
 
 function Call(port::Port, vessel::Vessel)
@@ -37,7 +42,15 @@ function Call(port::Port, vessel::Vessel)
         0.0,
         0.0,
         0.0,
+        0,
     )
+end
+
+function Call(port::Port, vessel::Vessel, wait_periods::Int64)
+    wait_periods >= 0 || throw(ArgumentError("wait_periods must be non-negative."))
+    call = Call(port, vessel)
+    call.wait_periods = wait_periods
+    return call
 end
 
 # A solution is a call sequence plus evaluator caches for the latest rebuilt state.
@@ -76,7 +89,9 @@ function Solution(mirp::MIRP, calls::Vector{Call})
 end
 
 function copy_call(call::Call)
-    return Call(call.port, call.vessel)
+    copied = Call(call.port, call.vessel)
+    copied.wait_periods = call.wait_periods
+    return copied
 end
 
 function copy_evaluated_call(call::Call)
@@ -146,9 +161,13 @@ function clone_evaluated_solution(mirp::MIRP, solution::Solution)
 end
 
 function solution_signature(solution::Solution)
-    return Tuple((call.port.id, call.vessel.id) for call in solution.calls)
+    return Tuple((call.port.id, call.vessel.id, call.wait_periods) for call in solution.calls)
 end
 
 function Base.show(io::IO, call::Call)
-    print(io, "(", call.port, ", ", call.vessel, ")")
+    if call.wait_periods > 0
+        print(io, "(", call.port, ", ", call.vessel, ", delay=", call.wait_periods, ")")
+    else
+        print(io, "(", call.port, ", ", call.vessel, ")")
+    end
 end

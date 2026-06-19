@@ -74,13 +74,33 @@ function evaluate(node::Solution, mirp::MIRP, q::Int64; rng::AbstractRNG = Rando
     return full_solutions
 end
 
-function possible_calls(mirp::MIRP, node::Solution)
+function possible_calls(
+    mirp::MIRP,
+    node::Solution;
+    include_waits::Bool = true,
+    wait_periods = WAIT_PERIODS,
+)
     calls = Call[]
 
     for port in mirp.ports
+        berth_use = berth_use_for_port(node, port.id)
         for vessel in mirp.vessels
             if is_feasible(node, port, vessel)
                 push!(calls, Call(port, vessel))
+
+                if include_waits
+                    for wait_period in wait_periods
+                        candidate_append(
+                            mirp,
+                            node,
+                            port,
+                            vessel,
+                            berth_use;
+                            wait_periods = wait_period,
+                        ) === nothing && continue
+                        push!(calls, Call(port, vessel, wait_period))
+                    end
+                end
             end
         end
     end
@@ -89,7 +109,7 @@ function possible_calls(mirp::MIRP, node::Solution)
 end
 
 function create_new_node(mirp::MIRP, node::Solution, call::Call)
-    return append_evaluated_call(mirp, node, call.port, call.vessel)
+    return append_evaluated_call(mirp, node, call.port, call.vessel; wait_periods = call.wait_periods)
 end
 
 # Expand one beam node, score each feasible successor, and keep its best w children.
@@ -99,11 +119,13 @@ function expand_node(
     w::Int64,
     q::Int64;
     rng::AbstractRNG = Random.default_rng(),
+    include_waits::Bool = true,
+    wait_periods = WAIT_PERIODS,
 )
     successors = Solution[]
     completed_solutions = Solution[]
 
-    for call in possible_calls(mirp, node)
+    for call in possible_calls(mirp, node; include_waits = include_waits, wait_periods = wait_periods)
         successor = create_new_node(mirp, node, call)
         if !successor.feasible
             continue
@@ -126,6 +148,8 @@ function beam_search(
     w::Int64 = 2,
     q::Int64 = 3,
     rng::AbstractRNG = Random.default_rng(),
+    include_waits::Bool = true,
+    wait_periods = WAIT_PERIODS,
 )
     if N < 1 || w < 1 || q < 1
         throw(ArgumentError("N, w, and q must be positive integers."))
@@ -140,7 +164,15 @@ function beam_search(
         successors = Solution[]
 
         for node in beam_nodes
-            node_successors, completed_solutions = expand_node(mirp, node, w, q; rng = rng)
+            node_successors, completed_solutions = expand_node(
+                mirp,
+                node,
+                w,
+                q;
+                rng = rng,
+                include_waits = include_waits,
+                wait_periods = wait_periods,
+            )
             append!(successors, node_successors)
             keep_best_N_solutions!(best_solutions, completed_solutions, N) # TODO: this could be more efficient with better datastructure
         end

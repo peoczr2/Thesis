@@ -94,6 +94,8 @@ function run_instance(
     w::Int64 = PAPER_BS_W,
     q::Int64 = PAPER_GRA_Q,
     ils_params::ILSParameters = PAPER_ILS_PARAMETERS,
+    include_waits::Bool = true,
+    wait_periods = WAIT_PERIODS,
 )
     mirp = loadMIRP(instance, horizon)
     mirp === nothing && error("Could not load $(instance) with horizon $(horizon).")
@@ -105,6 +107,8 @@ function run_instance(
         w = w,
         q = q,
         rng = rng,
+        include_waits = include_waits,
+        wait_periods = wait_periods,
     )
 
     ls_elapsed = @elapsed ls_solution = local_search(mirp, beam_result.best_solution; rng = rng)
