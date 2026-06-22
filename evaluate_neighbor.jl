@@ -83,17 +83,21 @@ function berth_use_by_port(mirp::MIRP, solution::Solution)
 end
 
 function append_replayed_call!(mirp::MIRP, solution::Solution, call::Call, berth_use)
+    if !is_feasible(solution, call.port, call.vessel)
+        solution.feasible = false
+        solution.score = Inf
+        return :infeasible
+    end
+
     port_id = call.port.id
     candidate = candidate_append(mirp, solution, call.port, call.vessel, berth_use[port_id])
     if candidate === nothing
-        solution.feasible = false
-        solution.score = Inf
-        return false
+        return :truncated
     end
 
     append_evaluated_call!(mirp, solution, candidate)
     berth_use[port_id][candidate.service_time] = candidate.vessels_in_port
-    return true
+    return :appended
 end
 
 function add_final_inventory_cost!(mirp::MIRP, solution::Solution)
@@ -132,7 +136,10 @@ function evaluate_suffix_neighbor(
     berth_use = berth_use_by_port(mirp, candidate)
 
     for call in suffix_calls
-        append_replayed_call!(mirp, candidate, call, berth_use) || return nothing
+        replay_status = append_replayed_call!(mirp, candidate, call, berth_use)
+        replay_status === :appended && continue
+        replay_status === :truncated && break
+        return nothing
     end
 
     add_final_inventory_cost && add_final_inventory_cost!(mirp, candidate)

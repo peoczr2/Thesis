@@ -37,7 +37,9 @@ function greedy_complete_solution(
     # Beam nodes normally arrive with evaluated prefix state. Neighborhood output
     # may not, so rebuild once only when the cached service fields are missing. 
     # TODO: Neighbouthood output woulld not call greedy_complete_solution at all as its only used in beam_search, could be deleted, but lets have an easy mechanism to check if a solution has been evaluated fully
-    solution = if partial_solution.feasible && all(call -> call.service_time_port > 0, partial_solution.calls)
+    solution = if partial_solution.feasible &&
+        !isempty(partial_solution.calls) &&
+        all(call -> call.service_time_port > 0, partial_solution.calls)
         clone_evaluated_solution(mirp, partial_solution)
     else
         evaluate_solution!(mirp, clone_solution(mirp, partial_solution); add_final_inventory_cost = false)
@@ -94,13 +96,13 @@ function greedy_complete_solution(
             continue
         end
 
-        sort!(vessel_options, by = candidate -> candidate.service_time)
+        sort!(vessel_options, by = candidate -> (candidate.arrival_time, candidate.service_time, candidate.vessel.id))
 
-        # The deterministic GRA uses earliest service. Stochastic vessel choice
-        # samples from feasible services with higher weight for earlier service.
+        # The deterministic GRA uses earliest arrival. Stochastic vessel choice
+        # samples from feasible arrivals with higher weight for earlier arrival.
         candidate = if randomize_vessel
-            service_times = [option.service_time for option in vessel_options]
-            weighted_choice(vessel_options, early_time_weights(service_times), rng)
+            arrival_times = [option.arrival_time for option in vessel_options]
+            weighted_choice(vessel_options, early_time_weights(arrival_times), rng)
         else
             vessel_options[1]
         end

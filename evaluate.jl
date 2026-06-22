@@ -120,6 +120,7 @@ end
 struct AppendCandidate
     port::Port
     vessel::Vessel
+    arrival_time::Int64
     service_time::Int64
     vessels_in_port::Int64
 end
@@ -131,10 +132,10 @@ function inventory_after_service_period(
     inventory::Float64,
     cargo::Float64,
     service_time::Int64,
+    include_period_rate::Bool = true,
 )
-    rate = port.rates[period_index(port.rates, service_time)] # TODO: i guess this calculates the accumulated rate from last service time until the current service time
+    rate = include_period_rate ? port.rates[period_index(port.rates, service_time)] : 0.0
 
-    # TODO: hmm, it should be empty i think, so maybe if its then have like a run time error or something so that we can catch if there is a bug in inventory tracking
     if port.type == :loading
         load_amount = max(0.0, vessel.class.capacity - cargo)
         return inventory + rate - load_amount
@@ -144,8 +145,15 @@ function inventory_after_service_period(
     return inventory - rate + unload_amount
 end
 
-function inventory_after_service_period(mirp::MIRP, call::Call, inventory::Float64, cargo::Float64, service_time::Int64)
-    return inventory_after_service_period(mirp, call.port, call.vessel, inventory, cargo, service_time)
+function inventory_after_service_period(
+    mirp::MIRP,
+    call::Call,
+    inventory::Float64,
+    cargo::Float64,
+    service_time::Int64,
+    include_period_rate::Bool = true,
+)
+    return inventory_after_service_period(mirp, call.port, call.vessel, inventory, cargo, service_time, include_period_rate)
 end
 
 # TODO: i think there is no such a thing as inventory_feasibility, as the heuristic should actively seek a service_time where there is enough inventory or enough free capacity
@@ -156,8 +164,9 @@ function service_is_inventory_feasible(
     inventory::Float64,
     cargo::Float64,
     service_time::Int64,
+    include_period_rate::Bool = true,
 )
-    inventory_after = inventory_after_service_period(mirp, port, vessel, inventory, cargo, service_time)
+    inventory_after = inventory_after_service_period(mirp, port, vessel, inventory, cargo, service_time, include_period_rate)
     return 0.0 - EPS <= inventory_after <= port.capacity + EPS
 end
 
@@ -179,14 +188,15 @@ function first_service_time(
     from_t = solution.port_time[port_id]
     cargo = solution.vessel_inventory[vessel.id]
 
-    for t in max(1, arrival):time_horizon
+    for t in max(1, arrival, from_t):time_horizon
         vessels_in_port = get(berth_use, t, 0)
         if vessels_in_port >= port.berth_limit
             continue
         end
 
         inventory_at_t, _ = advance_inventory(mirp, port, inventory_start, from_t, t - 1)
-        if service_is_inventory_feasible(mirp, port, vessel, inventory_at_t, cargo, t)
+        include_period_rate = t > from_t
+        if service_is_inventory_feasible(mirp, port, vessel, inventory_at_t, cargo, t, include_period_rate)
             return t, vessels_in_port + 1
         end
     end
@@ -234,11 +244,12 @@ function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time
     vessel_id = call.vessel.id
     inventory = solution.port_inventory[port_id]
     cargo = solution.vessel_inventory[vessel_id]
+    include_period_rate = service_time > solution.port_time[port_id]
     penalty = 0.0
 
     if call.port.type == :loading
         load_amount = max(0.0, call.vessel.class.capacity - cargo)
-        inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
+        inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time, include_period_rate)
         cargo += load_amount
 
         if inventory < 0.0
@@ -247,7 +258,7 @@ function apply_service!(mirp::MIRP, solution::Solution, call::Call, service_time
         end
     else
         unload_amount = cargo
-        inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time)
+        inventory = inventory_after_service_period(mirp, call, inventory, cargo, service_time, include_period_rate)
         cargo = 0.0
 
         if inventory > call.port.capacity
@@ -305,7 +316,7 @@ function candidate_append(
     )
 
     service_time > time_horizon && return nothing
-    return AppendCandidate(port, vessel, service_time, vessels_in_port)
+    return AppendCandidate(port, vessel, arrival, service_time, vessels_in_port)
 end
 
 """
@@ -396,7 +407,7 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
     routing_cost = 0.0
     inventory_cost = 0.0
 
-    for call in solution.calls
+    for (call_index, call) in enumerate(solution.calls)
         if !is_feasible(solution, call.port, call.vessel)
             solution.feasible = false
             solution.score = Inf
@@ -420,9 +431,8 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
         )
 
         if service_time > time_horizon
-            solution.feasible = false
-            solution.score = Inf
-            return solution
+            resize!(solution.calls, call_index - 1)
+            break
         end
 
         inventory, penalty = advance_inventory(

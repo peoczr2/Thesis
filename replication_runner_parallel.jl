@@ -4,7 +4,7 @@ using Printf
 using Statistics
 
 const REPLICATION_RUNNER_PATH = joinpath(@__DIR__, "replication_runner.jl")
-const PARALLEL_DEFAULT_SEED_COUNT = 5
+const PARALLEL_DEFAULT_SEED_COUNT = 1
 const PARALLEL_DEFAULT_MAX_WORKERS = 10
 const PARALLEL_RESULT_HEADERS = [
     :job_index,
@@ -21,6 +21,8 @@ const PARALLEL_RESULT_HEADERS = [
     :gap_pct,
     :calls,
     :levels,
+    :beam_pool,
+    :ls_improvements,
     :beam_seconds,
     :ls_seconds,
     :ils_seconds,
@@ -262,7 +264,7 @@ function write_parallel_report(path::String, rows, figure_path::String; N::Int64
         println(io)
         println(io, "## Per-run diagnostics")
         println(io)
-        println(io, "The CSV saved beside this report contains one row per instance/seed run with separate `bs_cost`, `ls_cost`, `ils_cost`, `beam_seconds`, `ls_seconds`, `ils_seconds`, `total_seconds`, `wall_seconds`, worker pid, worker run count, and worker RSS memory before/after/after-GC columns.")
+        println(io, "The CSV saved beside this report contains one row per instance/seed run with separate `bs_cost`, `ls_cost`, `ils_cost`, `beam_pool`, `ls_improvements`, `beam_seconds`, `ls_seconds`, `ils_seconds`, `total_seconds`, `wall_seconds`, worker pid, worker run count, and worker RSS memory before/after/after-GC columns.")
         println(io)
         println(io, "![Gap comparison]($(basename(figure_path)))")
     end

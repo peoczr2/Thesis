@@ -85,7 +85,27 @@ function gap(cost::Float64, reference::Float64)
     return 100.0 * (cost - reference) / reference
 end
 
-# One full replication pipeline for an instance: BS, RVND, then ILS.
+function locally_improve_beam_pool(mirp::MIRP, beam_solutions::Vector{Solution}; rng::AbstractRNG = Random.default_rng())
+    isempty(beam_solutions) && error("Beam search returned no complete solutions to improve.")
+
+    best_solution = nothing
+    improved_count = 0
+
+    for solution in beam_solutions
+        improved = local_search(mirp, solution; rng = rng)
+        if improved.score + EPS < solution.score
+            improved_count += 1
+        end
+
+        if best_solution === nothing || improved.score + EPS < best_solution.score
+            best_solution = improved
+        end
+    end
+
+    return best_solution, improved_count
+end
+
+# One full replication pipeline for an instance: BS, RVND over saved GRA pool, then ILS.
 function run_instance(
     instance::Symbol,
     horizon::Int64,
@@ -107,7 +127,10 @@ function run_instance(
         rng = rng,
     )
 
-    ls_elapsed = @elapsed ls_solution = local_search(mirp, beam_result.best_solution; rng = rng)
+    ls_improvements = 0
+    ls_elapsed = @elapsed begin
+        ls_solution, ls_improvements = locally_improve_beam_pool(mirp, beam_result.best_solutions; rng = rng)
+    end
     ils_elapsed = @elapsed ils_solution = iterated_local_search(
         mirp,
         ls_solution;
@@ -127,6 +150,8 @@ function run_instance(
         gap_pct = gap(ils_solution.score, reference),
         calls = length(ils_solution.calls),
         levels = beam_result.levels,
+        beam_pool = length(beam_result.best_solutions),
+        ls_improvements = ls_improvements,
         beam_seconds = beam_elapsed,
         ls_seconds = ls_elapsed,
         ils_seconds = ils_elapsed,
@@ -154,6 +179,8 @@ function write_results_csv(path::String, rows)
         :gap_pct,
         :calls,
         :levels,
+        :beam_pool,
+        :ls_improvements,
         :beam_seconds,
         :ls_seconds,
         :ils_seconds,
@@ -234,7 +261,7 @@ function write_report(path::String, rows, figure_path::String; N::Int64 = PAPER_
         println(io)
         println(io, "## Implementation notes")
         println(io)
-        println(io, "The paper does not specify every tie-break, random sampling, and simulated annealing temperature detail. This replication follows the described structure: BS evaluates partial solutions with one deterministic and `q - 1` randomized greedy completions, keeps unique scored nodes, applies RVND neighborhoods, then runs ILS. The local-search phase is applied to the BS incumbent before ILS; applying RVND to every generated complete solution was left as a documented deviation because the paper's implementation details and pruning rules are not fully specified.")
+        println(io, "The paper does not specify every tie-break, random sampling, and simulated annealing temperature detail. This replication follows the described structure: BS evaluates partial solutions with one deterministic and `q - 1` randomized greedy completions, keeps the best `N` complete GRA solutions found across the beam, applies RVND to that saved pool, then passes the best locally improved solution to ILS.")
         println(io)
         println(io, "## Results")
         println(io)
