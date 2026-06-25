@@ -13,17 +13,42 @@ include("solution_var.jl")
 include("evaluate.jl")
 include("evaluate_neighbor.jl")
 include("greedy_randomize_algorithm.jl")
-include("beam_search.jl")
+include("beam_search/predictive_beam_model.jl")
+include("beam_search/beam_scorers.jl")
+include("beam_search/beam_search.jl")
 include("neighbourhood.jl")
 include("local_search.jl")
 include("iterated_local_search.jl")
 
 # Small smoke entry point for running beam search on the default MIRPLib case.
-function main(; N::Int64 = 100, w::Int64 = 2, q::Int64 = 3, seed::Int64 = 1)
+function main(;
+    N::Int64 = 100,
+    w::Int64 = 2,
+    q::Int64 = 3,
+    seed::Int64 = 1,
+    scorer::Symbol = DEFAULT_BEAM_SCORER,
+    surrogate_shortlist_multiplier::Int64 = 2,
+    surrogate_model::Symbol = :linear,
+    surrogate_forest_trees::Int64 = 8,
+)
     rng = MersenneTwister(seed)
-    result = beam_search(INSTANCE; N = N, w = w, q = q, rng = rng)
+    beam_model = create_beam_scorer(
+        scorer;
+        q = q,
+        surrogate_model = surrogate_model,
+        surrogate_shortlist_multiplier = surrogate_shortlist_multiplier,
+        surrogate_forest_trees = surrogate_forest_trees,
+        rng = rng,
+    )
+    result = beam_search(
+        INSTANCE;
+        N = N,
+        w = w,
+        rng = rng,
+        model = beam_model,
+    )
 
-    println("Beam Search completed after $(result.levels) levels.")
+    println("Beam Search ($(scorer), surrogate=$(surrogate_model)) completed after $(result.levels) levels.")
     println("Best cost: $(result.best_solution.score)")
     println("Number of calls: $(length(result.best_solution.calls))")
 

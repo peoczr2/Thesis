@@ -217,6 +217,7 @@ function evaluate_remove(mirp::MIRP, solution::Solution, first_index::Int64, sec
 end
 
 function evaluate_swap_port(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
+    # TODO: could be like instead of returning a hard copy it could return only the final score, that was calculated by starting from i-1 accepting as it was evaled then go until j-1 keep in mind that j changed then go until the end. And the eval is basically just keeping track of the current state not for all eval and not overriding the solution. 
     prefix_length = i - 1
     suffix = Call[]
     sizehint!(suffix, length(solution.calls) - prefix_length)

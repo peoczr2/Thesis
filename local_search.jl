@@ -1,8 +1,11 @@
 
 using Random
 
-# Randomized Variable Neighborhood Descent (RVND), using first improvement.
-# After an improvement the neighborhood order is reshuffled from the start.
+"""
+Randomized Variable Neighborhood Descent (RVND), using first improvement.
+After an improvement the neighborhood order is reshuffled from the start.
+Returns a hard copy of the best solution found in the neighborhood or the same non-copy initial solution if no better solution was found.
+"""
 function local_search(
     mirp::MIRP,
     initial_solution::Solution;

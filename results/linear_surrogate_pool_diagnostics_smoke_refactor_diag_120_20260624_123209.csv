@@ -1,0 +1,2 @@
+instance,horizon,seed,scorer,surrogate_model,surrogate_min_samples,surrogate_lambda,surrogate_shortlist_multiplier,w,q,beam_seconds,levels,pool_size,best_cost,p10_cost,median_cost,p90_cost,worst_cost,cost_std,call_min,call_median,call_max,unique_signatures,unique_signatures_top100,avg_pairwise_distance_top100
+LR1_DR02_VC01_V6a,120,1,predictive,linear,4,1.0,2,1,1,0.006623641,44,5,46188.17743999998,46188.17743999998,69388.26743999998,71388.27743999998,71388.27743999998,10654.61956157375,56,56.0,56,5,5,0.825

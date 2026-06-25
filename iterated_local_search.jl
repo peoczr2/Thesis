@@ -43,15 +43,15 @@ function iterated_local_search(
     params::ILSParameters = PAPER_ILS_PARAMETERS,
     randomize::Bool = true,
 )
-    current_solution = local_search(mirp, initial_solution; rng = rng, randomize = randomize)
+    current_solution = local_search(mirp, initial_solution; rng = rng, randomize = randomize) # TODO: is this even neccessary? I mean conceptually as well the initila soultion does not have to be the best
     best_solution = clone_solution(mirp, current_solution)
     evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
     no_improvement = 0
 
     for iteration in 1:params.iterations
-        new_solution = current_solution
+        new_solution = current_solution # TODO: this might be wrong as it needs to be hard copy
         for _ in 1:params.perturbations
-            new_solution = apply_perturbation(mirp, new_solution; rng = rng, randomize = randomize)
+            new_solution = apply_perturbation(mirp, new_solution; rng = rng, randomize = randomize) # TODO: maybe hard copy the current_solution to new_solution beforehand and have apply_perturbation just modify the new_solution
         end
 
         new_solution = local_search(mirp, new_solution; rng = rng, randomize = randomize)
@@ -72,7 +72,7 @@ function iterated_local_search(
         if no_improvement >= params.restore_after
             # TODO: is this even neccessary?
             current_solution = clone_solution(mirp, best_solution)
-            evaluate_solution!(mirp, current_solution; add_final_inventory_cost = true)
+            evaluate_solution!(mirp, current_solution; add_final_inventory_cost = true) # TODO: i mean it should have already been evluated at this point
             no_improvement = 0
         end
     end

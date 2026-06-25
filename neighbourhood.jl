@@ -172,6 +172,9 @@ function swap_port_neighbor(
     return nothing
 end
 
+"""
+return a hard copy of the new solution found in the neighborhood or nothing if no better solution was found
+"""
 function neighborhood_neighbor(
     mirp::MIRP,
     solution::Solution,
@@ -180,7 +183,7 @@ function neighborhood_neighbor(
     rng::AbstractRNG = Random.default_rng(),
     randomize::Bool = true,
 )
-    source_solution = neighbor_source_solution(mirp, solution)
+    source_solution = neighbor_source_solution(mirp, solution) # TODO: the fuck is even this for?
 
     if neighborhood == :swap
         return swap_neighbor(mirp, source_solution, current_score; rng = rng, randomize = randomize)

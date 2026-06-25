@@ -1,5 +1,4 @@
 using Random
-using Statistics
 using MIRPLib
 
 const SCORE_KEY_DIGITS = 6
@@ -58,24 +57,16 @@ function keep_best_N_solutions!(pool::Vector{Solution}, candidates::Vector{Solut
     return pool
 end
 
-# Evaluate a partial node with one deterministic and q - 1 randomized completions.
-# The node receives the median completion score as its beam priority.
-function evaluate(node::Solution, mirp::MIRP, q::Int64; rng::AbstractRNG = Random.default_rng())
-    # TODO: could be a better data stucture as we will need the median and top x cadidates, while we are adding the elements one by one and not changing them later
-    full_solutions = Solution[]
-
-    push!(full_solutions, deterministic_eval(node, mirp))
-    for _ in 2:q
-        push!(full_solutions, stochastic_eval(node, mirp; rng = rng, randomize_port = true, randomize_vessel = false))
+function validate_beam_search_args(N::Int64, w::Int64, q::Int64, model::AbstractBeamScorer)
+    if N < 1 || w < 1 || q < 1
+        throw(ArgumentError("N, w, and q must be positive integers."))
     end
-
-    scores = [solution.score for solution in full_solutions if solution.feasible && isfinite(solution.score)]
-    node.score = isempty(scores) ? Inf : median(scores)
-    return full_solutions
+    return model
 end
 
 function possible_calls(mirp::MIRP, node::Solution)
     calls = Call[]
+    sizehint!(calls, length(mirp.ports) * length(mirp.vessels))
 
     for port in mirp.ports
         for vessel in mirp.vessels
@@ -97,25 +88,19 @@ function expand_node(
     mirp::MIRP,
     node::Solution,
     w::Int64,
-    q::Int64;
+    model::AbstractBeamScorer;
     rng::AbstractRNG = Random.default_rng(),
 )
+    calls = possible_calls(mirp, node)
     successors = Solution[]
-    completed_solutions = Solution[]
+    sizehint!(successors, length(calls))
 
-    for call in possible_calls(mirp, node)
+    for call in calls
         successor = create_new_node(mirp, node, call)
-        if !successor.feasible
-            continue
-        end
-
-        all_eval_sol = evaluate(successor, mirp, q; rng = rng)
-        append!(completed_solutions, all_eval_sol)
-        push!(successors, successor)
+        successor.feasible && push!(successors, successor)
     end
 
-    # TODO: this could be more efficient with better datastructure
-    return keep_best_unique(successors, w), completed_solutions
+    return score_successors!(model, mirp, successors, w; rng = rng)
 end
 
 # Main beam loop: expand a frontier, globally retain the best N successors, and
@@ -126,10 +111,9 @@ function beam_search(
     w::Int64 = 2,
     q::Int64 = 3,
     rng::AbstractRNG = Random.default_rng(),
+    model::AbstractBeamScorer = GRABeamScorer(q),
 )
-    if N < 1 || w < 1 || q < 1
-        throw(ArgumentError("N, w, and q must be positive integers."))
-    end
+    validate_beam_search_args(N, w, q, model)
 
     initial_node = evaluate_solution!(mirp, Solution(mirp); add_final_inventory_cost = false)
     beam_nodes = [initial_node]
@@ -140,10 +124,12 @@ function beam_search(
         successors = Solution[]
 
         for node in beam_nodes
-            node_successors, completed_solutions = expand_node(mirp, node, w, q; rng = rng)
+            node_successors, completed_solutions = expand_node(mirp, node, w, model; rng = rng)
             append!(successors, node_successors)
             keep_best_N_solutions!(best_solutions, completed_solutions, N) # TODO: this could be more efficient with better datastructure
         end
+
+        finish_level!(model)
 
         if isempty(successors)
             break

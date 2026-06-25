@@ -1,4 +1,5 @@
 using Random
+using Statistics
 using MIRPLib
 
 function weighted_choice(items::Vector, weights::Vector{Float64}, rng::AbstractRNG)
@@ -161,4 +162,28 @@ function stochastic_eval(
         randomize_port = randomize_port,
         randomize_vessel = randomize_vessel,
     )
+end
+
+
+# Evaluate a partial node with one deterministic and q - 1 randomized completions.
+# The node receives the median completion score as its beam priority.
+function evaluate(node::Solution, mirp::MIRP, q::Int64; rng::AbstractRNG = Random.default_rng())
+    # TODO: could be a better data stucture as we will need the median and top x cadidates, while we are adding the elements one by one and not changing them later
+    full_solutions = Solution[]
+    sizehint!(full_solutions, q)
+    scores = Float64[]
+    sizehint!(scores, q)
+
+    deterministic_solution = deterministic_eval(node, mirp)
+    push!(full_solutions, deterministic_solution)
+    deterministic_solution.feasible && isfinite(deterministic_solution.score) && push!(scores, deterministic_solution.score)
+
+    for _ in 2:q
+        solution = stochastic_eval(node, mirp; rng = rng, randomize_port = true, randomize_vessel = false)
+        push!(full_solutions, solution)
+        solution.feasible && isfinite(solution.score) && push!(scores, solution.score)
+    end
+
+    node.score = isempty(scores) ? Inf : median!(scores)
+    return full_solutions
 end

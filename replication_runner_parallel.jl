@@ -6,6 +6,9 @@ using Statistics
 const REPLICATION_RUNNER_PATH = joinpath(@__DIR__, "replication_runner.jl")
 const PARALLEL_DEFAULT_SEED_COUNT = 1
 const PARALLEL_DEFAULT_MAX_WORKERS = 10
+const PARALLEL_DEFAULT_LABEL = "paper_parallel"
+const PARALLEL_DEFAULT_GC_BETWEEN_RUNS = true
+const PARALLEL_DEFAULT_RESTART_WORKERS_EVERY = 0
 const PARALLEL_RESULT_HEADERS = [
     :job_index,
     :worker,
@@ -14,10 +17,23 @@ const PARALLEL_RESULT_HEADERS = [
     :instance,
     :horizon,
     :seed,
+    :N,
+    :w,
+    :q,
+    :beam_scorer,
+    :surrogate_model,
+    :surrogate_warmup_levels,
+    :surrogate_min_samples,
+    :surrogate_lambda,
+    :surrogate_forest_trees,
+    :surrogate_shortlist_multiplier,
     :objective,
     :bs_cost,
     :ls_cost,
     :ils_cost,
+    :bs_gap_pct,
+    :ls_gap_pct,
+    :ils_gap_pct,
     :gap_pct,
     :calls,
     :levels,
@@ -160,9 +176,16 @@ function run_instance_parallel(
     N::Int64,
     w::Int64,
     q::Int64,
+    scorer::Symbol,
+    surrogate_model::Symbol,
+    surrogate_warmup_levels::Int64,
+    surrogate_min_samples::Int64,
+    surrogate_lambda::Float64,
+    surrogate_forest_trees::Int64,
+    surrogate_shortlist_multiplier::Int64,
     ils_params::ILSParameters,
 )
-    return remotecall_fetch(run_instance, worker, instance, horizon, seed; N = N, w = w, q = q, ils_params = ils_params)
+    return remotecall_fetch(run_instance, worker, instance, horizon, seed; N = N, w = w, q = q, scorer = scorer, surrogate_model = surrogate_model, surrogate_warmup_levels = surrogate_warmup_levels, surrogate_min_samples = surrogate_min_samples, surrogate_lambda = surrogate_lambda, surrogate_forest_trees = surrogate_forest_trees, surrogate_shortlist_multiplier = surrogate_shortlist_multiplier, ils_params = ils_params)
 end
 
 function with_parallel_metadata(row, job_index::Int64, worker::Int64, pid::Integer, worker_run::Int64, wall_seconds::Float64, rss_before::Float64, rss_after::Float64, rss_after_gc::Float64, started_at::String, finished_at::String)
@@ -230,7 +253,7 @@ function summarize_seed_batch(rows)
     return summaries
 end
 
-function write_parallel_report(path::String, rows, figure_path::String; N::Int64, w::Int64, q::Int64, ils_params::ILSParameters, worker_count::Int64, restart_workers_every::Int64, gc_between_runs::Bool)
+function write_parallel_report(path::String, rows, figure_path::String; N::Int64, w::Int64, q::Int64, scorer::Symbol, surrogate_model::Symbol, surrogate_warmup_levels::Int64, surrogate_min_samples::Int64, surrogate_lambda::Float64, surrogate_shortlist_multiplier::Int64, surrogate_forest_trees::Int64, ils_params::ILSParameters, worker_count::Int64, restart_workers_every::Int64, gc_between_runs::Bool)
     horizon = rows[1].horizon
     generated_at = Dates.format(now(), dateformat"yyyy-mm-dd HH:MM")
     summaries = summarize_seed_batch(rows)
@@ -252,6 +275,13 @@ function write_parallel_report(path::String, rows, figure_path::String; N::Int64
         println(io, "- Beam nodes per level `N = $(N)`")
         println(io, "- Maximum children per node `w = $(w)`")
         println(io, "- Greedy randomized completions per successor `q = $(q)`")
+        println(io, "- Beam node scorer: `$(scorer)`")
+        scorer == :predictive && println(io, "- Predictive surrogate model: `$(surrogate_model)`")
+        scorer == :predictive && println(io, "- Predictive warmup levels: `$(surrogate_warmup_levels)`")
+        scorer == :predictive && println(io, "- Predictive minimum samples: `$(surrogate_min_samples)`")
+        scorer == :predictive && println(io, "- Predictive ridge lambda: `$(surrogate_lambda)`")
+        scorer == :predictive && surrogate_model in (:forest, :random_forest) && println(io, "- Random forest trees: `$(surrogate_forest_trees)`")
+        scorer == :predictive && println(io, "- Predictive shortlist multiplier: `$(surrogate_shortlist_multiplier)`")
         println(io, "- ILS iterations: `$(ils_params.iterations)`")
         println(io)
         println(io, "## Per-instance seed summary")
@@ -262,7 +292,7 @@ function write_parallel_report(path::String, rows, figure_path::String; N::Int64
             println(io, "| $(row.instance) | $(row.runs) | $(fmt2(row.best_ils)) | $(fmt2(row.avg_ils)) | $(fmt2(row.best_gap))% | $(fmt2(row.avg_gap))% | $(fmt2(row.avg_total_seconds)) | $(fmt2(row.avg_wall_seconds)) | $(fmt2(row.total_seconds)) |")
         end
         println(io)
-        println(io, "## Per-run diagnostics")
+        println(io, "## Per-run details")
         println(io)
         println(io, "The CSV saved beside this report contains one row per instance/seed run with separate `bs_cost`, `ls_cost`, `ils_cost`, `beam_pool`, `ls_improvements`, `beam_seconds`, `ls_seconds`, `ils_seconds`, `total_seconds`, `wall_seconds`, worker pid, worker run count, and worker RSS memory before/after/after-GC columns.")
         println(io)
@@ -287,19 +317,27 @@ function start_workers(count::Int64)
 end
 
 function main_parallel()
-    horizon = parse_int_arg("horizon", 120)
-    N = parse_int_arg("N", PAPER_BS_N)
-    w = parse_int_arg("w", PAPER_BS_W)
-    q = parse_int_arg("q", PAPER_GRA_Q)
+    horizon = parse_int_arg("horizon", DEFAULT_REPLICATION_HORIZON)
+    N = parse_int_arg("N", DEFAULT_REPLICATION_N)
+    w = parse_int_arg("w", DEFAULT_REPLICATION_W)
+    q = parse_int_arg("q", DEFAULT_REPLICATION_Q)
+    scorer = parse_symbol_arg("scorer", DEFAULT_REPLICATION_SCORER)
+    surrogate_model = parse_symbol_arg("surrogate-model", DEFAULT_SURROGATE_MODEL)
+    surrogate_warmup_levels = parse_int_arg("surrogate-warmup-levels", DEFAULT_SURROGATE_WARMUP_LEVELS)
+    surrogate_min_samples = parse_int_arg("surrogate-min-samples", DEFAULT_SURROGATE_MIN_SAMPLES)
+    surrogate_lambda = parse_float_arg("surrogate-lambda", DEFAULT_SURROGATE_LAMBDA)
+    surrogate_shortlist_multiplier = parse_int_arg("surrogate-shortlist-multiplier", DEFAULT_SURROGATE_SHORTLIST_MULTIPLIER)
+    surrogate_forest_trees = parse_int_arg("surrogate-forest-trees", DEFAULT_SURROGATE_FOREST_TREES)
     ils_iterations = parse_int_arg("ils-iterations", PAPER_ILS_PARAMETERS.iterations)
-    run_label = parse_string_arg("label", "paper_parallel")
+    run_label = parse_string_arg("label", PARALLEL_DEFAULT_LABEL)
+    instances = parse_instances_arg()
     seeds = parse_parallel_seed_arg()
     ils_params = ILSParameters(iterations = ils_iterations)
-    restart_workers_every = parse_int_arg("restart-workers-every", 0)
-    gc_between_runs = parse_bool_arg("gc-between-runs", true)
+    restart_workers_every = parse_int_arg("restart-workers-every", PARALLEL_DEFAULT_RESTART_WORKERS_EVERY)
+    gc_between_runs = parse_bool_arg("gc-between-runs", PARALLEL_DEFAULT_GC_BETWEEN_RUNS)
     restart_workers_every >= 0 || error("--restart-workers-every must be >= 0.")
 
-    jobs = [(instance = instance, seed = seed) for instance in TARGET_INSTANCES for seed in seeds]
+    jobs = [(instance = instance, seed = seed) for instance in instances for seed in seeds]
     isempty(jobs) && error("No replication jobs to run.")
 
     requested_jobs = parse_int_arg("jobs", PARALLEL_DEFAULT_MAX_WORKERS)
@@ -311,7 +349,7 @@ function main_parallel()
     stamp = Dates.format(now(), dateformat"yyyymmdd_HHMMSS")
     csv_path = joinpath(out_dir, "bs_ils_replication_$(run_label)_$(horizon)_$(stamp).csv")
 
-    println("Starting $(length(jobs)) replication jobs ($(length(TARGET_INSTANCES)) instances x $(length(seeds)) seeds) on $(worker_count) single-thread Julia workers.")
+    println("Starting $(length(jobs)) replication jobs ($(length(instances)) instances x $(length(seeds)) seeds) on $(worker_count) single-thread Julia workers.")
     requested_jobs > PARALLEL_DEFAULT_MAX_WORKERS && println("Requested --jobs=$(requested_jobs); capped at $(PARALLEL_DEFAULT_MAX_WORKERS) workers.")
     println("GC between runs: $(gc_between_runs). Restart workers every $(restart_workers_every) run(s); 0 means disabled.")
     flush(stdout)
@@ -346,7 +384,7 @@ function main_parallel()
                     rss_before = worker_rss_mb(worker)
                     started_at = Dates.format(now(), dateformat"yyyy-mm-dd HH:MM:SS")
 
-                    println("Running $(job.instance), horizon=$(horizon), seed=$(job.seed), N=$(N), w=$(w), q=$(q), ils_iterations=$(ils_iterations), worker_run=$(worker_run), rss=$(fmt2(rss_before)) MiB ($(worker_label(worker)))")
+                    println("Running $(job.instance), horizon=$(horizon), seed=$(job.seed), N=$(N), w=$(w), q=$(q), scorer=$(scorer), surrogate_model=$(surrogate_model), warmup=$(surrogate_warmup_levels), min_samples=$(surrogate_min_samples), lambda=$(surrogate_lambda), forest_trees=$(surrogate_forest_trees), shortlist_multiplier=$(surrogate_shortlist_multiplier), ils_iterations=$(ils_iterations), worker_run=$(worker_run), rss=$(fmt2(rss_before)) MiB ($(worker_label(worker)))")
                     flush(stdout)
 
                     row = nothing
@@ -358,6 +396,13 @@ function main_parallel()
                         N = N,
                         w = w,
                         q = q,
+                        scorer = scorer,
+                        surrogate_model = surrogate_model,
+                        surrogate_warmup_levels = surrogate_warmup_levels,
+                        surrogate_min_samples = surrogate_min_samples,
+                        surrogate_lambda = surrogate_lambda,
+                        surrogate_forest_trees = surrogate_forest_trees,
+                        surrogate_shortlist_multiplier = surrogate_shortlist_multiplier,
                         ils_params = ils_params,
                     )
                     finished_at = Dates.format(now(), dateformat"yyyy-mm-dd HH:MM:SS")
@@ -432,7 +477,7 @@ function main_parallel()
 
     write_parallel_results_csv(csv_path, rows)
     write_gap_svg(svg_path, rows)
-    write_parallel_report(report_path, rows, svg_path; N = N, w = w, q = q, ils_params = ils_params, worker_count = worker_count, restart_workers_every = restart_workers_every, gc_between_runs = gc_between_runs)
+    write_parallel_report(report_path, rows, svg_path; N = N, w = w, q = q, scorer = scorer, surrogate_model = surrogate_model, surrogate_warmup_levels = surrogate_warmup_levels, surrogate_min_samples = surrogate_min_samples, surrogate_lambda = surrogate_lambda, surrogate_shortlist_multiplier = surrogate_shortlist_multiplier, surrogate_forest_trees = surrogate_forest_trees, ils_params = ils_params, worker_count = worker_count, restart_workers_every = restart_workers_every, gc_between_runs = gc_between_runs)
 
     println("Wrote $(csv_path)")
     println("Wrote $(svg_path)")

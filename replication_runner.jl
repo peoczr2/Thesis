@@ -7,7 +7,9 @@ include("solution_var.jl")
 include("evaluate.jl")
 include("evaluate_neighbor.jl")
 include("greedy_randomize_algorithm.jl")
-include("beam_search.jl")
+include("beam_search/predictive_beam_model.jl")
+include("beam_search/beam_scorers.jl")
+include("beam_search/beam_search.jl")
 include("neighbourhood.jl")
 include("local_search.jl")
 include("iterated_local_search.jl")
@@ -17,8 +19,26 @@ const PAPER_BS_W = 2
 const PAPER_GRA_Q = 3
 const PAPER_TIME_LIMIT_SECONDS = 90_000.0
 
-# Instance subset requested for the replication run.
-const TARGET_INSTANCES = [
+# Default experiment configuration. CLI flags override these values, but keeping
+# them here makes each replication batch easy to audit from the source file.
+const DEFAULT_REPLICATION_HORIZON = 120
+const DEFAULT_REPLICATION_N = PAPER_BS_N
+const DEFAULT_REPLICATION_W = PAPER_BS_W
+const DEFAULT_REPLICATION_Q = PAPER_GRA_Q
+const DEFAULT_REPLICATION_SCORER = DEFAULT_BEAM_SCORER
+const DEFAULT_SURROGATE_MODEL = :linear
+const DEFAULT_SURROGATE_WARMUP_LEVELS = 1
+const DEFAULT_SURROGATE_MIN_SAMPLES = 16
+const DEFAULT_SURROGATE_LAMBDA = 1.0
+const DEFAULT_SURROGATE_SHORTLIST_MULTIPLIER = 2
+const DEFAULT_SURROGATE_FOREST_TREES = 8
+const DEFAULT_REPLICATION_SEEDS = [1]
+const DEFAULT_REPLICATION_LABEL = "paper"
+const DEFAULT_RESULTS_DIR = "results"
+
+# Instance subset requested for the replication run. Override with
+# --instances=LR1_DR02_VC01_V6a,LR1_DR02_VC02_V6a when needed.
+const DEFAULT_TARGET_INSTANCES = [
     :LR1_DR02_VC01_V6a,
     :LR1_DR02_VC02_V6a,
     :LR1_DR02_VC03_V7a,
@@ -26,6 +46,7 @@ const TARGET_INSTANCES = [
     :LR1_DR02_VC04_V8a,
     :LR1_DR02_VC05_V8a,
 ]
+const TARGET_INSTANCES = DEFAULT_TARGET_INSTANCES
 
 # Paper table values used as the reference line in generated reports and plots.
 const PAPER_RESULTS = Dict(
@@ -71,14 +92,37 @@ function parse_string_arg(name::String, default::String)
     return default
 end
 
-function parse_seed_arg()
+function parse_float_arg(name::String, default::Float64)
+    prefix = "--$(name)="
+    for arg in ARGS
+        startswith(arg, prefix) && return parse(Float64, replace(arg, prefix => ""))
+    end
+    return default
+end
+
+function parse_seed_arg(default::Vector{Int64} = DEFAULT_REPLICATION_SEEDS)
     prefix = "--seeds="
     for arg in ARGS
         if startswith(arg, prefix)
-            return [parse(Int64, seed) for seed in split(replace(arg, prefix => ""), ",")]
+            return [parse(Int64, strip(seed)) for seed in split(replace(arg, prefix => ""), ",") if !isempty(strip(seed))]
         end
     end
-    return [1]
+    return copy(default)
+end
+
+function parse_symbol_arg(name::String, default::Symbol)
+    return Symbol(parse_string_arg(name, String(default)))
+end
+
+function parse_instances_arg(default_instances::Vector{Symbol} = DEFAULT_TARGET_INSTANCES)
+    prefix = "--instances="
+    for arg in ARGS
+        if startswith(arg, prefix)
+            raw = replace(arg, prefix => "")
+            return Symbol.(strip.(split(raw, ",")))
+        end
+    end
+    return copy(default_instances)
 end
 
 function gap(cost::Float64, reference::Float64)
@@ -113,18 +157,37 @@ function run_instance(
     N::Int64 = PAPER_BS_N,
     w::Int64 = PAPER_BS_W,
     q::Int64 = PAPER_GRA_Q,
+    scorer::Symbol = DEFAULT_REPLICATION_SCORER,
+    surrogate_model::Symbol = DEFAULT_SURROGATE_MODEL,
+    surrogate_warmup_levels::Int64 = DEFAULT_SURROGATE_WARMUP_LEVELS,
+    surrogate_min_samples::Int64 = DEFAULT_SURROGATE_MIN_SAMPLES,
+    surrogate_lambda::Float64 = DEFAULT_SURROGATE_LAMBDA,
+    surrogate_shortlist_multiplier::Int64 = DEFAULT_SURROGATE_SHORTLIST_MULTIPLIER,
+    surrogate_forest_trees::Int64 = DEFAULT_SURROGATE_FOREST_TREES,
     ils_params::ILSParameters = PAPER_ILS_PARAMETERS,
 )
     mirp = loadMIRP(instance, horizon)
     mirp === nothing && error("Could not load $(instance) with horizon $(horizon).")
     rng = MersenneTwister(seed)
 
+    beam_model = create_beam_scorer(
+        scorer;
+        q = q,
+        surrogate_model = surrogate_model,
+        surrogate_warmup_levels = surrogate_warmup_levels,
+        surrogate_min_samples = surrogate_min_samples,
+        surrogate_lambda = surrogate_lambda,
+        surrogate_shortlist_multiplier = surrogate_shortlist_multiplier,
+        surrogate_forest_trees = surrogate_forest_trees,
+        rng = rng,
+    )
+
     beam_elapsed = @elapsed beam_result = beam_search(
         mirp;
         N = N,
         w = w,
-        q = q,
         rng = rng,
+        model = beam_model,
     )
 
     ls_improvements = 0
@@ -143,10 +206,23 @@ function run_instance(
         instance = String(instance),
         horizon = horizon,
         seed = seed,
+        N = N,
+        w = w,
+        q = q,
+        beam_scorer = String(scorer),
+        surrogate_model = String(surrogate_model),
+        surrogate_warmup_levels = surrogate_warmup_levels,
+        surrogate_min_samples = surrogate_min_samples,
+        surrogate_lambda = surrogate_lambda,
+        surrogate_forest_trees = surrogate_forest_trees,
+        surrogate_shortlist_multiplier = surrogate_shortlist_multiplier,
         objective = reference,
         bs_cost = beam_result.best_solution.score,
         ls_cost = ls_solution.score,
         ils_cost = ils_solution.score,
+        bs_gap_pct = gap(beam_result.best_solution.score, reference),
+        ls_gap_pct = gap(ls_solution.score, reference),
+        ils_gap_pct = gap(ils_solution.score, reference),
         gap_pct = gap(ils_solution.score, reference),
         calls = length(ils_solution.calls),
         levels = beam_result.levels,
@@ -172,10 +248,23 @@ function write_results_csv(path::String, rows)
         :instance,
         :horizon,
         :seed,
+        :N,
+        :w,
+        :q,
+        :beam_scorer,
+        :surrogate_model,
+        :surrogate_warmup_levels,
+        :surrogate_min_samples,
+        :surrogate_lambda,
+        :surrogate_forest_trees,
+        :surrogate_shortlist_multiplier,
         :objective,
         :bs_cost,
         :ls_cost,
         :ils_cost,
+        :bs_gap_pct,
+        :ls_gap_pct,
+        :ils_gap_pct,
         :gap_pct,
         :calls,
         :levels,
@@ -243,7 +332,7 @@ function write_gap_svg(path::String, rows)
 end
 
 # Markdown report writer matching the paper-style result table plus a gap figure.
-function write_report(path::String, rows, figure_path::String; N::Int64 = PAPER_BS_N, w::Int64 = PAPER_BS_W, q::Int64 = PAPER_GRA_Q, ils_params::ILSParameters = PAPER_ILS_PARAMETERS)
+function write_report(path::String, rows, figure_path::String; N::Int64 = DEFAULT_REPLICATION_N, w::Int64 = DEFAULT_REPLICATION_W, q::Int64 = DEFAULT_REPLICATION_Q, scorer::Symbol = DEFAULT_REPLICATION_SCORER, surrogate_model::Symbol = DEFAULT_SURROGATE_MODEL, surrogate_warmup_levels::Int64 = DEFAULT_SURROGATE_WARMUP_LEVELS, surrogate_min_samples::Int64 = DEFAULT_SURROGATE_MIN_SAMPLES, surrogate_lambda::Float64 = DEFAULT_SURROGATE_LAMBDA, surrogate_shortlist_multiplier::Int64 = DEFAULT_SURROGATE_SHORTLIST_MULTIPLIER, surrogate_forest_trees::Int64 = DEFAULT_SURROGATE_FOREST_TREES, ils_params::ILSParameters = PAPER_ILS_PARAMETERS)
     horizon = rows[1].horizon
     generated_at = Dates.format(now(), dateformat"yyyy-mm-dd HH:MM")
     open(path, "w") do io
@@ -256,12 +345,23 @@ function write_report(path::String, rows, figure_path::String; N::Int64 = PAPER_
         println(io, "- Beam nodes per level `N = $(N)`")
         println(io, "- Maximum children per node `w = $(w)`")
         println(io, "- Greedy randomized completions per successor `q = $(q)`")
+        println(io, "- Beam node scorer: `$(scorer)`")
+        scorer == :predictive && println(io, "- Predictive surrogate model: `$(surrogate_model)`")
+        scorer == :predictive && println(io, "- Predictive warmup levels: `$(surrogate_warmup_levels)`")
+        scorer == :predictive && println(io, "- Predictive minimum samples: `$(surrogate_min_samples)`")
+        scorer == :predictive && println(io, "- Predictive ridge lambda: `$(surrogate_lambda)`")
+        scorer == :predictive && surrogate_model in (:forest, :random_forest) && println(io, "- Random forest trees: `$(surrogate_forest_trees)`")
+        scorer == :predictive && println(io, "- Predictive shortlist multiplier: `$(surrogate_shortlist_multiplier)`")
         println(io, "- ILS parameters from Table 4: initial SA probability `$(ils_params.initial_probability)`, final SA probability `$(ils_params.final_probability)`, `$(ils_params.iterations)` iterations, restore after `$(ils_params.restore_after)` non-improving accepted moves, `$(ils_params.perturbations)` perturbations")
         println(io, "- Horizon run in this batch: `$(horizon)`")
         println(io)
         println(io, "## Implementation notes")
         println(io)
-        println(io, "The paper does not specify every tie-break, random sampling, and simulated annealing temperature detail. This replication follows the described structure: BS evaluates partial solutions with one deterministic and `q - 1` randomized greedy completions, keeps the best `N` complete GRA solutions found across the beam, applies RVND to that saved pool, then passes the best locally improved solution to ILS.")
+        if scorer == :gra
+            println(io, "The paper does not specify every tie-break, random sampling, and simulated annealing temperature detail. This replication follows the described structure: BS evaluates partial solutions with one deterministic and `q - 1` randomized greedy completions, keeps the best `N` complete GRA solutions found across the beam, applies RVND to that saved pool, then passes the best locally improved solution to ILS.")
+        else
+            println(io, "This variant replaces exhaustive GRA-based beam-node scoring with an online `$(surrogate_model)` predictive model. The model is trained from GRA-completed partial nodes, ranks all successors cheaply, and only the top predictive shortlist is GRA-completed before choosing children and saving incumbent candidates for RVND and ILS.")
+        end
         println(io)
         println(io, "## Results")
         println(io)
@@ -278,25 +378,33 @@ end
 
 # CLI entry point for paper-parameter and smoke replication batches.
 function main()
-    horizon = parse_int_arg("horizon", 120)
-    N = parse_int_arg("N", PAPER_BS_N)
-    w = parse_int_arg("w", PAPER_BS_W)
-    q = parse_int_arg("q", PAPER_GRA_Q)
+    horizon = parse_int_arg("horizon", DEFAULT_REPLICATION_HORIZON)
+    N = parse_int_arg("N", DEFAULT_REPLICATION_N)
+    w = parse_int_arg("w", DEFAULT_REPLICATION_W)
+    q = parse_int_arg("q", DEFAULT_REPLICATION_Q)
+    scorer = parse_symbol_arg("scorer", DEFAULT_REPLICATION_SCORER)
+    surrogate_model = parse_symbol_arg("surrogate-model", DEFAULT_SURROGATE_MODEL)
+    surrogate_warmup_levels = parse_int_arg("surrogate-warmup-levels", DEFAULT_SURROGATE_WARMUP_LEVELS)
+    surrogate_min_samples = parse_int_arg("surrogate-min-samples", DEFAULT_SURROGATE_MIN_SAMPLES)
+    surrogate_lambda = parse_float_arg("surrogate-lambda", DEFAULT_SURROGATE_LAMBDA)
+    surrogate_shortlist_multiplier = parse_int_arg("surrogate-shortlist-multiplier", DEFAULT_SURROGATE_SHORTLIST_MULTIPLIER)
+    surrogate_forest_trees = parse_int_arg("surrogate-forest-trees", DEFAULT_SURROGATE_FOREST_TREES)
     ils_iterations = parse_int_arg("ils-iterations", PAPER_ILS_PARAMETERS.iterations)
-    run_label = parse_string_arg("label", "paper")
+    run_label = parse_string_arg("label", DEFAULT_REPLICATION_LABEL)
+    instances = parse_instances_arg()
     seeds = parse_seed_arg()
     ils_params = ILSParameters(iterations = ils_iterations)
-    out_dir = "results"
+    out_dir = DEFAULT_RESULTS_DIR
     mkpath(out_dir)
     stamp = Dates.format(now(), dateformat"yyyymmdd_HHMMSS")
     csv_path = joinpath(out_dir, "bs_ils_replication_$(run_label)_$(horizon)_$(stamp).csv")
 
     rows = []
-    for instance in TARGET_INSTANCES
+    for instance in instances
         for seed in seeds
-            println("Running $(instance), horizon=$(horizon), seed=$(seed), N=$(N), w=$(w), q=$(q), ils_iterations=$(ils_iterations)")
+            println("Running $(instance), horizon=$(horizon), seed=$(seed), N=$(N), w=$(w), q=$(q), scorer=$(scorer), surrogate_model=$(surrogate_model), warmup=$(surrogate_warmup_levels), min_samples=$(surrogate_min_samples), lambda=$(surrogate_lambda), forest_trees=$(surrogate_forest_trees), shortlist_multiplier=$(surrogate_shortlist_multiplier), ils_iterations=$(ils_iterations)")
             flush(stdout)
-            row = run_instance(instance, horizon, seed; N = N, w = w, q = q, ils_params = ils_params)
+            row = run_instance(instance, horizon, seed; N = N, w = w, q = q, scorer = scorer, surrogate_model = surrogate_model, surrogate_warmup_levels = surrogate_warmup_levels, surrogate_min_samples = surrogate_min_samples, surrogate_lambda = surrogate_lambda, surrogate_forest_trees = surrogate_forest_trees, surrogate_shortlist_multiplier = surrogate_shortlist_multiplier, ils_params = ils_params)
             push!(rows, row)
             write_results_csv(csv_path, rows)
             println("  ILS cost=$(fmt2(row.ils_cost)), gap=$(fmt2(row.gap_pct))%, time=$(fmt2(row.total_seconds))s")
@@ -309,7 +417,7 @@ function main()
 
     write_results_csv(csv_path, rows)
     write_gap_svg(svg_path, rows)
-    write_report(report_path, rows, svg_path; N = N, w = w, q = q, ils_params = ils_params)
+    write_report(report_path, rows, svg_path; N = N, w = w, q = q, scorer = scorer, surrogate_model = surrogate_model, surrogate_warmup_levels = surrogate_warmup_levels, surrogate_min_samples = surrogate_min_samples, surrogate_lambda = surrogate_lambda, surrogate_shortlist_multiplier = surrogate_shortlist_multiplier, surrogate_forest_trees = surrogate_forest_trees, ils_params = ils_params)
 
     println("Wrote $(csv_path)")
     println("Wrote $(svg_path)")

@@ -399,6 +399,9 @@ function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vesse
     return append_evaluated_call!(mirp, new_solution, candidate)
 end
 
+"""
+Returns/Modifies the solution object, no hard-copy
+"""
 function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_cost::Bool = true)
     reset_solution_state!(solution, mirp)
 
