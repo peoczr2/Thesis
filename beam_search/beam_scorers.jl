@@ -3,13 +3,13 @@ using MIRPLib
 
 const DEFAULT_BEAM_SCORER = :predictive
 
-abstract type AbstractBeamScorer end
+abstract type AbstractNodeScorer end
 
-mutable struct GRABeamScorer <: AbstractBeamScorer
+mutable struct GRABeamScorer <: AbstractNodeScorer
     q::Int64
 end
 
-mutable struct PredictiveBeamScorer <: AbstractBeamScorer
+mutable struct PredictiveBeamScorer <: AbstractNodeScorer
     q::Int64
     quality_model::AbstractQualityModel
     warmup_levels::Int64
@@ -42,7 +42,7 @@ function create_beam_scorer(
 )
     q < 1 && throw(ArgumentError("q must be a positive integer."))
     if scorer == :gra
-        return GRABeamScorer(q)
+        return GRANodeScorer(q)
     elseif scorer == :predictive
         quality_model = create_quality_model(
             surrogate_model;
