@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<rect width="100%" height="100%" fill="white"/>
+<text x="490.0" y="24" text-anchor="middle" font-family="Arial" font-size="18">Replication gap vs paper best gap</text>
+<line x1="90" y1="195.0" x2="950" y2="195.0" stroke="#444"/>
+<text x="18" y="199.0" font-family="Arial" font-size="12">0%</text>
+<rect x="145.66666666666669" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
+<rect x="177.66666666666669" y="195.0" width="28.0" height="0.0005338508306392115" fill="#f58518"/>
+<text x="161.66666666666669" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 161.66666666666669,375)">VC01_V6a</text>
+<rect x="289.0" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
+<rect x="321.0" y="140.89467772702068" width="28.0" height="54.10532227297933" fill="#f58518"/>
+<text x="305.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 305.0,375)">VC02_V6a</text>
+<rect x="432.33333333333337" y="195.0" width="28.0" height="1.3933284760973392" fill="#4c78a8"/>
+<rect x="464.33333333333337" y="50.0" width="28.0" height="145.0" fill="#f58518"/>
+<text x="448.33333333333337" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 448.33333333333337,375)">VC03_V7a</text>
+<rect x="575.6666666666667" y="195.0" width="28.0" height="0.0" fill="#4c78a8"/>
+<rect x="607.6666666666667" y="139.70050604137296" width="28.0" height="55.299493958627046" fill="#f58518"/>
+<text x="591.6666666666667" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 591.6666666666667,375)">VC03_V8a</text>
+<rect x="719.0" y="194.3569253187243" width="28.0" height="0.6430746812756949" fill="#4c78a8"/>
+<rect x="751.0" y="167.38883889482656" width="28.0" height="27.611161105173434" fill="#f58518"/>
+<text x="735.0" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 735.0,375)">VC04_V8a</text>
+<rect x="862.3333333333334" y="195.0" width="28.0" height="1.7684553735081612" fill="#4c78a8"/>
+<rect x="894.3333333333334" y="188.5282821079762" width="28.0" height="6.471717892023811" fill="#f58518"/>
+<text x="878.3333333333334" y="375" text-anchor="middle" font-family="Arial" font-size="11" transform="rotate(35 878.3333333333334,375)">VC05_V8a</text>
+<rect x="760" y="42" width="14" height="14" fill="#4c78a8"/><text x="780" y="54" font-family="Arial" font-size="12">Paper best gap</text>
+<rect x="760" y="62" width="14" height="14" fill="#f58518"/><text x="780" y="74" font-family="Arial" font-size="12">Replication gap</text>
+</svg>

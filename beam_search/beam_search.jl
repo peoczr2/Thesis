@@ -66,21 +66,26 @@ function keep_best_N_solutions!(
     j = 1
     k = 1
     
+    # TODO: maybe assume that best_n is already sorted
+    sorted_candidates = sort(
+        [candidate for candidate in candidates if candidate.feasible && isfinite(candidate.score)],
+        by = candidate -> candidate.score,
+    )
     len_b = length(best_n)
-    len_c = length(candidates)
+    len_c = length(sorted_candidates)
     
     # No candidate is better than the Nth best_n
-    if len_b == N && !isempty(candidates) && candidates[1].score >= best_n[end].score
+    if len_b == N && !isempty(sorted_candidates) && sorted_candidates[1].score >= best_n[end].score
         return best_n
     end
 
     # Merge the two sorted lists until the best N
     while k <= N
-        if i <= len_b && (j > len_c || best_n[i].score <= candidates[j].score)
+        if i <= len_b && (j > len_c || best_n[i].score <= sorted_candidates[j].score)
             scratch[k] = best_n[i]
             i += 1
         elseif j <= len_c
-            scratch[k] = candidates[j]
+            scratch[k] = sorted_candidates[j]
             j += 1
         else
             break # Both sources completely exhausted
@@ -156,13 +161,14 @@ function beam_search(
     w::Int64 = 2,
     q::Int64 = 3,
     rng::AbstractRNG = Random.default_rng(),
-    model::AbstractNodeScorer = GRANodeScorer(q),
+    model::AbstractNodeScorer = GRABeamScorer(q),
 )
     validate_beam_search_args(N, w, q, model)
 
     initial_node = evaluate_solution!(mirp, Solution(mirp); add_final_inventory_cost = false) # TODO: maybe create an initial node with the initial things from the mirp data, like for vessels intial port etc
     beam_nodes = [initial_node]
-    best_n = Vector{Solution}(undef, N)
+    best_n = Solution[]
+    sizehint!(best_n, N)
     best_n_helper = Vector{Solution}(undef, N)
     levels = 0
 

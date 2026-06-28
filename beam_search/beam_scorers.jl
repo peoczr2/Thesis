@@ -42,7 +42,7 @@ function create_beam_scorer(
 )
     q < 1 && throw(ArgumentError("q must be a positive integer."))
     if scorer == :gra
-        return GRANodeScorer(q)
+        return GRABeamScorer(q)
     elseif scorer == :predictive
         quality_model = create_quality_model(
             surrogate_model;
@@ -60,10 +60,6 @@ function create_beam_scorer(
     end
 
     throw(ArgumentError("scorer must be either :gra or :predictive."))
-end
-
-function should_use_gra_scoring(model::PredictiveBeamScorer)
-    return model.levels_seen < model.warmup_levels || !model.quality_model.trained
 end
 
 function complete_and_train!(
@@ -101,7 +97,8 @@ function score_successors!(
 )
     completed_solutions = Solution[]
 
-    if should_use_gra_scoring(model)
+    # Use GRA, not enough data to train a predictive model yet
+    if model.levels_seen < model.warmup_levels || !model.quality_model.trained 
         for successor in successors
             append!(completed_solutions, complete_and_train!(model, successor, mirp; rng = rng))
         end
