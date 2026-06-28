@@ -43,36 +43,40 @@ function iterated_local_search(
     params::ILSParameters = PAPER_ILS_PARAMETERS,
     randomize::Bool = true,
 )
-    current_solution = local_search(mirp, initial_solution; rng = rng, randomize = randomize) # TODO: is this even neccessary? I mean conceptually as well the initila soultion does not have to be the best
-    best_solution = clone_solution(mirp, current_solution)
-    evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
+    saved_solution = local_search(mirp, initial_solution; rng = rng, randomize = randomize)
+    current_solution = clone_evaluated_solution(mirp, saved_solution)
+    best_solution = clone_evaluated_solution(mirp, saved_solution)
+    perturbation_evaluator = CallEvaluator(mirp)
     no_improvement = 0
 
     for iteration in 1:params.iterations
-        new_solution = current_solution # TODO: this might be wrong as it needs to be hard copy
         for _ in 1:params.perturbations
-            new_solution = apply_perturbation(mirp, new_solution; rng = rng, randomize = randomize) # TODO: maybe hard copy the current_solution to new_solution beforehand and have apply_perturbation just modify the new_solution
+            current_solution = apply_perturbation!(
+                mirp,
+                current_solution;
+                rng = rng,
+                randomize = randomize,
+                evaluator = perturbation_evaluator,
+            )
         end
 
-        new_solution = local_search(mirp, new_solution; rng = rng, randomize = randomize)
+        current_solution = local_search!(mirp, current_solution; rng = rng, randomize = randomize)
 
-        if sim_annealing_criterion(new_solution, current_solution, iteration, params, rng)
-            if new_solution.score + EPS < best_solution.score
-                # TODO: is this even neccessary?
-                best_solution = clone_solution(mirp, new_solution)
-                evaluate_solution!(mirp, best_solution; add_final_inventory_cost = true)
+        if sim_annealing_criterion(current_solution, saved_solution, iteration, params, rng)
+            if current_solution.score + EPS < best_solution.score
+                best_solution = clone_evaluated_solution(mirp, current_solution)
                 no_improvement = 0
             else
                 no_improvement += 1
             end
 
-            current_solution = new_solution
+            saved_solution = clone_evaluated_solution(mirp, current_solution)
+        else
+            current_solution = clone_evaluated_solution(mirp, saved_solution)
         end
 
         if no_improvement >= params.restore_after
-            # TODO: is this even neccessary?
-            current_solution = clone_solution(mirp, best_solution)
-            evaluate_solution!(mirp, current_solution; add_final_inventory_cost = true) # TODO: i mean it should have already been evluated at this point
+            current_solution = clone_evaluated_solution(mirp, best_solution)
             no_improvement = 0
         end
     end
