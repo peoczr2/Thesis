@@ -23,7 +23,7 @@ end
 """
 modifys the solution and returns it
 """
-function apply_swap!(solution::Solution, i::Int64, j::Int64, score::Float64)
+function apply_swap!(mirp::MIRP, solution::Solution, i::Int64, j::Int64, score::Float64)
     solution.calls[i], solution.calls[j] = solution.calls[j], solution.calls[i]
     return evaluate_suffix_neighbor!(mirp, solution, i-1) # the point is that it only needs to evaluate from i(including), with solution modified
 end
@@ -46,7 +46,7 @@ function swap_neighbor!(
             i < j || continue
 
             score = score_swap!(evaluator, mirp, solution, i, j)
-            accepted_score(score, current_score) && return apply_swap!(solution, i, j, score)
+            accepted_score(score, current_score) && return apply_swap!(mirp, solution, i, j, score)
         end
     end
 
@@ -54,7 +54,7 @@ function swap_neighbor!(
 end
 
 
-function apply_relocate!(solution::Solution, i::Int64, j::Int64, score::Float64)
+function apply_relocate!(mirp::MIRP, solution::Solution, i::Int64, j::Int64, score::Float64)
     call = solution.calls[i]
     popat!(solution.calls, i)
     insert!(solution.calls, j, call)
@@ -75,7 +75,7 @@ function relocate_neighbor!(
             i == j && continue
 
             score = score_relocate!(evaluator, mirp, solution, i, j)
-            accepted_score(score, current_score) && return apply_relocate!(solution, i, j, score)
+            accepted_score(score, current_score) && return apply_relocate!(mirp, solution, i, j, score)
         end
     end
 
@@ -83,7 +83,7 @@ function relocate_neighbor!(
 end
 
 
-function apply_replace!(solution::Solution, i::Int64, port::Port, score::Float64)
+function apply_replace!(mirp::MIRP, solution::Solution, i::Int64, port::Port, score::Float64)
     solution.calls[i] = Call(port, solution.calls[i].vessel)
     return evaluate_suffix_neighbor!(mirp, solution, i-1)
 end
@@ -104,13 +104,13 @@ function replace_neighbor!(
             end
 
             score = score_replace!(evaluator, mirp, solution, i, port)
-            accepted_score(score, current_score) && return apply_replace!(solution, i, port, score)
+            accepted_score(score, current_score) && return apply_replace!(mirp, solution, i, port, score)
         end
     end
 
     return nothing
 end
-function apply_insert!(solution::Solution, i::Int64, j::Int64, score::Float64; port::Port, second_port::Port, vessel::Vessel)
+function apply_insert!(mirp::MIRP, solution::Solution, i::Int64, j::Int64, score::Float64; port::Port, second_port::Port, vessel::Vessel)
     insert!(solution.calls, i, Call(port, vessel))
     insert!(solution.calls, j, Call(second_port, vessel))
     return evaluate_suffix_neighbor!(mirp, solution, min(i, j) - 1)
@@ -133,7 +133,7 @@ function insert_neighbor!(
                 port.type == first_port.type && continue
 
                 score = score_insert!(evaluator, mirp, solution, first_port, vessel, port)
-                accepted_score(score, current_score) && return apply_insert!(solution, length(solution.calls) + 1, length(solution.calls) + 2, score; port = first_port, second_port = port, vessel = vessel)
+                accepted_score(score, current_score) && return apply_insert!(mirp, solution, length(solution.calls) + 1, length(solution.calls) + 2, score; port = first_port, second_port = port, vessel = vessel)
             end
         end
     end
@@ -152,7 +152,12 @@ function next_same_vessel_index(calls::Vector{Call}, start_index::Int64)
 end
 
 
-function apply_remove!(solution::Solution, i::Int64, j::Int64, score::Float64)
+function apply_remove!(mirp::MIRP, solution::Solution, i::Int64, j::Union{Nothing, Int64}, score::Float64)
+    if j === nothing
+        popat!(solution.calls, i)
+        return evaluate_suffix_neighbor!(mirp, solution, i - 1)
+    end
+
     popat!(solution.calls, max(i, j))
     popat!(solution.calls, min(i, j))
     return evaluate_suffix_neighbor!(mirp, solution, min(i, j) - 1)
@@ -174,14 +179,14 @@ function remove_neighbor!(
     for i in ordered_indices(rng, n, randomize)
         j = next_same_vessel_index(solution.calls, i)
         score = score_remove!(evaluator, mirp, solution, i, j)
-        accepted_score(score, current_score) && return apply_remove!(solution, i, j === nothing ? 0 : j, score)
+        accepted_score(score, current_score) && return apply_remove!(mirp, solution, i, j, score)
     end
 
     return nothing
 end
 
 
-function apply_swap_port!(solution::Solution, i::Int64, j::Int64, score::Float64)
+function apply_swap_port!(mirp::MIRP, solution::Solution, i::Int64, j::Int64, score::Float64)
     call_i = solution.calls[i]
     call_j = solution.calls[j]
     solution.calls[i] = Call(call_j.port, call_i.vessel)
@@ -212,7 +217,7 @@ function swap_port_neighbor!(
             end
 
             score = score_swap_port!(evaluator, mirp, solution, i, j)
-            accepted_score(score, current_score) && return apply_swap_port!(solution, i, j, score)
+            accepted_score(score, current_score) && return apply_swap_port!(mirp, solution, i, j, score)
         end
     end
 
@@ -291,8 +296,8 @@ function apply_perturbation!(
             randomize = randomize,
             evaluator = evaluator,
         )
-        move !== nothing && return apply_neighbor_move(mirp, source_solution, move)
+        move !== nothing && return move
     end
 
-    return clone_solution(mirp, source_solution)
+    return source_solution
 end

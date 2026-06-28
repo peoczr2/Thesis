@@ -2,6 +2,7 @@ function has_evaluated_calls(solution::Solution)
     return all(call -> call.service_time_port > 0, solution.calls)
 end
 
+# TODO: this is kind of useless
 function neighbor_source_solution(mirp::MIRP, solution::Solution)
     return solution.feasible && has_evaluated_calls(solution) ?
         solution :
@@ -511,6 +512,38 @@ function evaluate_suffix_neighbor!(
 
     add_final_inventory_cost && add_final_inventory_cost!(mirp, candidate)
     return candidate.feasible && isfinite(candidate.score) ? candidate : nothing
+end
+
+function evaluate_suffix_neighbor!(
+    mirp::MIRP,
+    solution::Solution,
+    prefix_length::Int64;
+    add_final_inventory_cost::Bool = true,
+)
+    suffix_calls = suffix_from_order(solution.calls, prefix_length)
+    return evaluate_suffix_neighbor!(
+        mirp,
+        solution,
+        prefix_length,
+        suffix_calls;
+        add_final_inventory_cost = add_final_inventory_cost,
+    )
+end
+
+function evaluate_suffix_neighbor(
+    mirp::MIRP,
+    solution::Solution,
+    prefix_length::Int64,
+    suffix_calls;
+    add_final_inventory_cost::Bool = true,
+)
+    return evaluate_suffix_neighbor!(
+        mirp,
+        solution,
+        prefix_length,
+        suffix_calls;
+        add_final_inventory_cost = add_final_inventory_cost,
+    )
 end
 
 function suffix_from_order(order::Vector{Call}, prefix_length::Int64)

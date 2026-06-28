@@ -15,6 +15,7 @@ function local_search!(
     neighborhoods_to_use::Vector{Symbol} = collect(NEIGHBORHOODS),
     randomize::Bool = true,
 )
+    current_solution = initial_solution
     !current_solution.feasible && return current_solution # TODO: what is even this line for? I mean local_search would obviously get a feasible solution(every solution is feasible only calls are not), then local_search trys to find a better solution
 
     evaluator = CallEvaluator(mirp)
@@ -54,7 +55,7 @@ function local_search(
     neighborhoods_to_use::Vector{Symbol} = collect(NEIGHBORHOODS),
     randomize::Bool = true,
 )
-    current_solution = evaluate_solution(mirp, clone_solution(mirp, initial_solution); add_final_inventory_cost = true) # TODO: needs to be hard copy
+    current_solution = evaluate_solution!(mirp, clone_solution(mirp, initial_solution); add_final_inventory_cost = true) # TODO: needs to be hard copy
     !current_solution.feasible && return current_solution # TODO: what is even this line for? I mean local_search would obviously get a feasible solution(every solution is feasible only calls are not), then local_search trys to find a better solution
 
     return local_search!(mirp, current_solution; rng = rng, neighborhoods_to_use = neighborhoods_to_use, randomize = randomize)
