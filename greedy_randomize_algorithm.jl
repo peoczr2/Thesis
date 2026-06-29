@@ -26,8 +26,11 @@ function early_time_weights(times::Vector{Int64})
     return [exp(-0.5 * ((time - earliest) / spread)^2) for time in times]
 end
 
-# Greedy randomized completion: repeatedly repair the most urgent inventory risk
-# with a feasible vessel, skipping unschedulable extensions for this prefix.
+"""
+partial_solution: already evaluated solution
+Greedy randomized completion: repeatedly repair the most urgent inventory risk with a feasible vessel, skipping unschedulable extensions for this prefix.
+Does not modify partial_solution, but returns a new evaluated solution with a final score.
+"""
 function greedy_complete_solution(
     mirp::MIRP,
     partial_solution::Solution;
@@ -35,20 +38,7 @@ function greedy_complete_solution(
     randomize_port::Bool = false,
     randomize_vessel::Bool = false,
 )
-    # Beam nodes normally arrive with evaluated prefix state. Neighborhood output
-    # may not, so rebuild once only when the cached service fields are missing. 
-    # TODO: Neighbouthood output woulld not call greedy_complete_solution at all as its only used in beam_search, could be deleted, but lets have an easy mechanism to check if a solution has been evaluated fully
-    solution = if partial_solution.feasible &&
-        !isempty(partial_solution.calls) &&
-        all(call -> call.service_time_port > 0, partial_solution.calls)
-        clone_evaluated_solution(mirp, partial_solution)
-    else
-        evaluate_solution!(mirp, clone_solution(mirp, partial_solution); add_final_inventory_cost = false)
-    end
-
-    if !solution.feasible
-        return solution
-    end
+    solution = clone_evaluated_solution(mirp, partial_solution)
 
     # A skipped port failed for the current prefix. After any successful append,
     # the prefix changes, so those ports are allowed to compete again.
@@ -117,30 +107,7 @@ function greedy_complete_solution(
         return solution
     end
 
-    routing_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_routing_costs
-    inventory_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_inventory_costs
-    time_horizon = horizon(mirp)
-
-    # Greedy completion was evaluated as a prefix. Charge the remaining inventory
-    # penalties through the horizon only once, after no more calls can be added.
-    for port in mirp.ports
-        inventory, penalty = advance_inventory(
-            mirp,
-            port,
-            solution.port_inventory[port.id],
-            solution.port_time[port.id],
-            time_horizon,
-        )
-        solution.port_inventory[port.id] = inventory
-        solution.port_time[port.id] = time_horizon
-        solution.port_next_violation[port.id] = time_horizon + 1
-        inventory_cost += penalty
-    end
-
-    routing_cost -= early_finish_reward(mirp, solution)
-
-    solution.score = routing_cost + inventory_cost
-    solution.feasible = true
+    finalize_evaluation!(mirp, solution)
     return solution
 end
 
@@ -164,19 +131,18 @@ function stochastic_eval(
     )
 end
 
-
-# Evaluate a partial node with one deterministic and q - 1 randomized completions.
-# The node receives the median completion score as its beam priority.
+"""
+Evaluate a partial node with one deterministic and q - 1 randomized completions.
+The node receives the median completion score as its score.
+Returns the GRA created full_solutions
+"""
 function evaluate(node::Solution, mirp::MIRP, q::Int64; rng::AbstractRNG = Random.default_rng())
-    # TODO: could be a better data stucture as we will need the median and top x cadidates, while we are adding the elements one by one and not changing them later
-    full_solutions = Solution[]
-    sizehint!(full_solutions, q)
-    scores = Float64[]
-    sizehint!(scores, q)
+    full_solutions = sizehint!(Solution[], q)
+    scores = sizehint!(Float64[], q)
 
     deterministic_solution = deterministic_eval(node, mirp)
     push!(full_solutions, deterministic_solution)
-    deterministic_solution.feasible && isfinite(deterministic_solution.score) && push!(scores, deterministic_solution.score)
+    deterministic_solution.feasible && isfinite(deterministic_solution.score) && push!(scores, deterministic_solution.score) # TODO: why would a returned solution not be feasible...
 
     for _ in 2:q
         solution = stochastic_eval(node, mirp; rng = rng, randomize_port = true, randomize_vessel = false)

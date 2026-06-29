@@ -28,6 +28,7 @@ function main(;
     seed::Int64 = 1,
     scorer::Symbol = DEFAULT_BEAM_SCORER,
     surrogate_shortlist_multiplier::Int64 = 2,
+    surrogate_warmup_levels::Int64 = 1,
     surrogate_model::Symbol = :linear,
     surrogate_forest_trees::Int64 = 8,
 )
@@ -37,6 +38,7 @@ function main(;
         q = q,
         surrogate_model = surrogate_model,
         surrogate_shortlist_multiplier = surrogate_shortlist_multiplier,
+        surrogate_warmup_levels = surrogate_warmup_levels,
         surrogate_forest_trees = surrogate_forest_trees,
         rng = rng,
     )

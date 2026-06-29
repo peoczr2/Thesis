@@ -8,6 +8,9 @@ const SERVER_URL = get(ENV, "QUEUE_SERVER", "http://127.0.0.1:8000")
 const WORKER_ID = get(ENV, "WORKER_ID", "$(gethostname())-$(getpid())")
 const MAX_RETRIES = parse(Int, get(ENV, "QUEUE_MAX_RETRIES", "8"))
 const RETRY_SECONDS = parse(Float64, get(ENV, "QUEUE_RETRY_SECONDS", "10"))
+const RESULTS_DIR = get(ENV, "QUEUE_RESULTS_DIR", joinpath(@__DIR__, "..", "results", "distributed_queue"))
+
+include(joinpath(@__DIR__, "..", "replication_runner.jl"))
 
 function request_with_retry(fn, description::String)
     for attempt in 1:MAX_RETRIES
@@ -31,12 +34,22 @@ function get_task()
     return JSON3.read(String(response.body))
 end
 
-function complete_task(instance::String, seed::Int; runtime_seconds::Union{Nothing, Float64} = nothing)
+function complete_task(
+    instance::String,
+    horizon::Int,
+    seed::Int,
+    scorer::String;
+    runtime_seconds::Union{Nothing, Float64} = nothing,
+    result_path::Union{Nothing, String} = nothing,
+)
     payload = Dict(
         "instance" => instance,
+        "horizon" => horizon,
         "seed" => seed,
+        "scorer" => scorer,
         "worker_id" => WORKER_ID,
         "status" => "completed",
+        "result_path" => result_path,
         "runtime_seconds" => runtime_seconds,
     )
     body = JSON3.write(payload)
@@ -51,16 +64,22 @@ function complete_task(instance::String, seed::Int; runtime_seconds::Union{Nothi
     return JSON3.read(String(response.body))
 end
 
-function run_dummy_optimization(instance::String, seed::Int)
-    println("Starting C-BEAT optimization | Instance: $(instance) | Seed: $(seed)")
+function result_filename(instance::String, horizon::Int, seed::Int, scorer::String)
+    stamp = Dates.format(now(), dateformat"yyyymmdd_HHMMSS")
+    safe_worker = replace(WORKER_ID, r"[^A-Za-z0-9_.-]" => "_")
+    return "bs_ils_$(scorer)_$(instance)_h$(horizon)_seed$(seed)_$(safe_worker)_$(stamp).csv"
+end
+
+function run_optimization(instance::String, horizon::Int, seed::Int, scorer::String)
+    println("Starting BS-ILS | Instance: $(instance) | Horizon: $(horizon) | Seed: $(seed) | Scorer: $(scorer)")
     started = time()
 
-    # Replace this block later with the real Julia replication call, for example:
-    # include(joinpath(@__DIR__, "..", "replication_runner.jl"))
-    # row = run_instance(Symbol(instance), 120, seed; scorer = :gra)
-    sleep(rand(2:5))
+    row = run_instance(Symbol(instance), horizon, seed; scorer = Symbol(scorer))
+    mkpath(RESULTS_DIR)
+    result_path = joinpath(RESULTS_DIR, result_filename(instance, horizon, seed, scorer))
+    write_results_csv(result_path, [row])
 
-    return time() - started
+    return time() - started, result_path
 end
 
 function main()
@@ -74,11 +93,15 @@ function main()
         end
 
         instance = String(task.instance)
+        horizon = Int(task.horizon)
         seed = Int(task.seed)
-        runtime_seconds = run_dummy_optimization(instance, seed)
-        response = complete_task(instance, seed; runtime_seconds = runtime_seconds)
-        println("Completed $(instance), seed=$(seed): $(response)")
+        scorer = String(task.scorer)
+        runtime_seconds, result_path = run_optimization(instance, horizon, seed, scorer)
+        response = complete_task(instance, horizon, seed, scorer; runtime_seconds = runtime_seconds, result_path = result_path)
+        println("Completed $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer): $(response)")
     end
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

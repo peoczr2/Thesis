@@ -8,10 +8,12 @@ function horizon(mirp::MIRP)
     return mirp.metadata.n_periods
 end
 
+# TODO: i mean is this neccessary
 function period_index(values::AbstractVector, t::Int64)
     return clamp(t, 1, length(values))
 end
 
+# TODO: i dont know, could tweak it
 function violation_price(mirp::MIRP, port::Port, t::Int64)
     price = port.prices[period_index(port.prices, t)]
     return price == 0.0 ? mirp.metadata.spot_market_price : price
@@ -104,7 +106,7 @@ end
 
 
 """
-Checks if the vessels last port and the port param has different types.t.
+Checks if the vessels last port and the port param has different types.
 """
 function is_feasible(node::Solution, port::Port, vessel::Vessel)
     last_call = node.last_occ_vessels[vessel.id]
@@ -320,7 +322,41 @@ function candidate_append(
 end
 
 """
-Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place.
+After each call was evaluated in the solution this function handles the remaining parts.
+Like the final inventory penalties, violations and early finish rewards.
+"""
+function finalize_evaluation!(mirp::MIRP, solution::Solution)
+    routing_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_routing_costs
+    inventory_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_inventory_costs
+    time_horizon = horizon(mirp)
+
+    for port in mirp.ports
+        inventory, penalty = advance_inventory(
+            mirp,
+            port,
+            solution.port_inventory[port.id],
+            solution.port_time[port.id],
+            time_horizon,
+        )
+        solution.port_inventory[port.id] = inventory
+        solution.port_time[port.id] = time_horizon
+        solution.port_next_violation[port.id] = time_horizon + 1
+        inventory_cost += penalty
+    end
+
+    routing_cost -= early_finish_reward(mirp, solution)
+
+    solution.score = routing_cost + inventory_cost
+    solution.feasible = true
+    return solution
+end
+
+
+
+
+
+"""
+Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place. It does not finalize the evaluation, thus final score is not calculated
 """
 function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::AppendCandidate)
     port = candidate.port
@@ -382,7 +418,7 @@ function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::Appen
 end
 
 """
-Appends a call to a solution hard copy and evaluates this new solution efficiently.
+Appends a call to a solution hard copy and evaluates this new solution efficiently. It does not finalize the evaluation, thus final score is not calculated
 """
 function append_evaluated_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
     new_solution = clone_evaluated_solution(mirp, solution)

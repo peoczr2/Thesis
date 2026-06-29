@@ -13,26 +13,37 @@ The server owns the queue in `task_queue.json`. Workers repeatedly pull one task
 
 ## 1. Start The Python Server
 
-Open a terminal on the coordinator machine:
+On the remote Linux server:
 
-```powershell
-cd distributed-queue
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install fastapi uvicorn
-python -m uvicorn server:app --host 0.0.0.0 --port 8000
+```bash
+cd /path/to/beam_search_thesis/distributed-queue
+uv run --with fastapi --with uvicorn python -m uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-In another coordinator terminal, check queue status:
+In another terminal on the same remote server, start ngrok:
 
-```powershell
+```bash
+ngrok http 8000
+```
+
+Copy the public `https://...ngrok-free.app` forwarding URL. Workers on the university PCs will use that URL as `QUEUE_SERVER`; they do not need to be on the same network as the server.
+
+Check queue status from the remote server:
+
+```bash
 curl http://127.0.0.1:8000/status
 ```
 
-Expected first status:
+Or check it through ngrok from any machine:
+
+```bash
+curl https://YOUR-NGROK-URL.ngrok-free.app/status
+```
+
+Expected first status with the default `server.py` batch is 450 pending tasks: 15 instances x 3 horizons x 10 seeds x `gra`.
 
 ```json
-{"pending":150,"in_progress":0,"completed":0,"stale_reset":0}
+{"pending":450,"in_progress":0,"completed":0,"stale_reset":0}
 ```
 
 ## 2. Set Up Julia On Each Worker Machine
@@ -46,13 +57,13 @@ julia --project=. setup.jl
 
 ## 3. Run Multiple Workers
 
-Replace `COORDINATOR_IP` with the IP address or hostname of the server machine.
+Replace `YOUR-NGROK-URL.ngrok-free.app` with the public forwarding host from `ngrok http 8000`.
 
 Terminal 1:
 
 ```powershell
 cd distributed-queue
-$env:QUEUE_SERVER="http://COORDINATOR_IP:8000"
+$env:QUEUE_SERVER="https://YOUR-NGROK-URL.ngrok-free.app"
 $env:WORKER_ID="lab-worker-01"
 julia --project=. worker.jl
 ```
@@ -61,7 +72,7 @@ Terminal 2:
 
 ```powershell
 cd distributed-queue
-$env:QUEUE_SERVER="http://COORDINATOR_IP:8000"
+$env:QUEUE_SERVER="https://YOUR-NGROK-URL.ngrok-free.app"
 $env:WORKER_ID="lab-worker-02"
 julia --project=. worker.jl
 ```
@@ -70,7 +81,7 @@ Terminal 3:
 
 ```powershell
 cd distributed-queue
-$env:QUEUE_SERVER="http://COORDINATOR_IP:8000"
+$env:QUEUE_SERVER="https://YOUR-NGROK-URL.ngrok-free.app"
 $env:WORKER_ID="lab-worker-03"
 julia --project=. worker.jl
 ```
@@ -78,8 +89,8 @@ julia --project=. worker.jl
 You should see lines like:
 
 ```text
-Starting C-BEAT optimization | Instance: LR1_DR02_VC01_V6a | Seed: 1
-Completed LR1_DR02_VC01_V6a, seed=1
+Starting BS-ILS | Instance: LR1_DR02_VC01_V6a | Horizon: 120 | Seed: 1 | Scorer: gra
+Completed LR1_DR02_VC01_V6a, horizon=120, seed=1, scorer=gra
 ```
 
 Meanwhile, refresh the server status:
@@ -98,8 +109,7 @@ To resume later:
 
 ```powershell
 cd distributed-queue
-.\.venv\Scripts\Activate.ps1
-python -m uvicorn server:app --host 0.0.0.0 --port 8000
+uv run --with fastapi --with uvicorn python -m uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
 Then restart any number of Julia workers. Tasks already completed will not be repeated.
@@ -110,9 +120,16 @@ To start over, stop the server and delete `task_queue.json`:
 
 ```powershell
 Remove-Item task_queue.json
-python -m uvicorn server:app --host 0.0.0.0 --port 8000
+uv run --with fastapi --with uvicorn python -m uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
 ## 6. Replacing The Dummy Workload
 
-In `worker.jl`, replace `run_dummy_optimization` with the real call to your MIRP code. Keep the pull/complete protocol unchanged so the server can continue handling stragglers and restarts.
+The worker already calls `run_instance(Symbol(instance), horizon, seed; scorer = Symbol(scorer))` from `replication_runner.jl`. To change the experiment grid, edit these values in `server.py` before creating `task_queue.json`:
+
+- `DEFAULT_INSTANCES`
+- `DEFAULT_HORIZONS`
+- `DEFAULT_SEEDS`
+- `DEFAULT_SCORERS`
+
+If `task_queue.json` already exists, the server resumes that saved queue. Delete it before restart when you want a freshly generated queue from the updated defaults.

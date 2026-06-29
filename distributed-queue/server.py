@@ -13,9 +13,12 @@ from pydantic import BaseModel
 QUEUE_FILE = Path(os.environ.get("QUEUE_FILE", "task_queue.json"))
 STALE_HOURS = float(os.environ.get("STALE_HOURS", "4"))
 DEFAULT_SEEDS = list(range(1, 11))
+DEFAULT_HORIZONS = [120, 180, 360]
+DEFAULT_SCORERS = ["gra"]
 
 # Edit this list before the first server start, or delete task_queue.json and
-# restart the server after changing it. The default creates 15 x 10 = 150 tasks.
+# restart the server after changing it. The default creates
+# len(instances) x 3 horizons x 10 seeds x 1 scorer tasks.
 DEFAULT_INSTANCES = [
     "LR1_DR02_VC01_V6a",
     "LR1_DR02_VC02_V6a",
@@ -23,15 +26,15 @@ DEFAULT_INSTANCES = [
     "LR1_DR02_VC03_V8a",
     "LR1_DR02_VC04_V8a",
     "LR1_DR02_VC05_V8a",
-    "LR1_DR04_VC01_V12a",
-    "LR1_DR04_VC02_V13a",
-    "LR1_DR04_VC03_V14a",
-    "LR1_DR04_VC04_V15a",
+    "LR1_DR03_VC03_V10b",
+    "LR1_DR03_VC03_V13b",
+    "LR1_DR03_VC03_V16a",
+    "LR1_DR04_VC03_V15a",
+    "LR1_DR04_VC03_V15b",
+    "LR1_DR04_VC05_V17a",
     "LR1_DR04_VC05_V17b",
-    "LR1_DR08_VC01_V25a",
-    "LR1_DR08_VC02_V30a",
-    "LR1_DR08_VC03_V35a",
-    "LR1_DR08_VC05_V40b",
+    "LR1_DR05_VC05_V25a",
+    "LR1_DR05_VC05_V25b",
 ]
 
 app = FastAPI(title="Dynamic MIRP Task Queue", version="1.0.0")
@@ -40,7 +43,9 @@ lock = threading.Lock()
 
 class CompleteTaskRequest(BaseModel):
     instance: str
+    horizon: int
     seed: int
+    scorer: str = "gra"
     worker_id: str | None = None
     result_path: str | None = None
     status: str = "completed"
@@ -63,30 +68,43 @@ def parse_time(value: str | None) -> datetime | None:
 def make_initial_state() -> dict[str, list[dict[str, Any]]]:
     pending: list[dict[str, Any]] = []
     for instance in DEFAULT_INSTANCES:
-        for seed in DEFAULT_SEEDS:
-            pending.append(
-                {
-                    "instance": instance,
-                    "seed": seed,
-                    "state": "Pending",
-                    "attempts": 0,
-                    "created_at": now_iso(),
-                    "started_at": None,
-                    "completed_at": None,
-                    "worker_id": None,
-                    "result_path": None,
-                    "runtime_seconds": None,
-                }
-            )
+        for horizon in DEFAULT_HORIZONS:
+            for scorer in DEFAULT_SCORERS:
+                for seed in DEFAULT_SEEDS:
+                    pending.append(
+                        {
+                            "instance": instance,
+                            "horizon": horizon,
+                            "seed": seed,
+                            "scorer": scorer,
+                            "state": "Pending",
+                            "attempts": 0,
+                            "created_at": now_iso(),
+                            "started_at": None,
+                            "completed_at": None,
+                            "worker_id": None,
+                            "result_path": None,
+                            "runtime_seconds": None,
+                        }
+                    )
     return {"Pending": pending, "In_Progress": [], "Completed": []}
 
 
 def normalize_state(state: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
-    return {
+    normalized = {
         "Pending": list(state.get("Pending", [])),
         "In_Progress": list(state.get("In_Progress", [])),
         "Completed": list(state.get("Completed", [])),
     }
+    for bucket, tasks in normalized.items():
+        for task in tasks:
+            if "horizon" not in task:
+                raise ValueError(
+                    f"Existing {QUEUE_FILE} has old-format task in {bucket}. "
+                    "Delete it before starting the multi-horizon queue."
+                )
+            task.setdefault("scorer", "gra")
+    return normalized
 
 
 def load_state() -> dict[str, list[dict[str, Any]]]:
@@ -105,8 +123,13 @@ def save_state(state: dict[str, list[dict[str, Any]]]) -> None:
     tmp_file.replace(QUEUE_FILE)
 
 
-def task_key(task: dict[str, Any]) -> tuple[str, int]:
-    return str(task["instance"]), int(task["seed"])
+def task_key(task: dict[str, Any]) -> tuple[str, int, int, str]:
+    return (
+        str(task["instance"]),
+        int(task["horizon"]),
+        int(task["seed"]),
+        str(task.get("scorer", "gra")),
+    )
 
 
 def reset_stale_tasks(state: dict[str, list[dict[str, Any]]]) -> int:
@@ -176,14 +199,16 @@ def get_task(worker_id: str | None = None) -> dict[str, Any]:
 
         return {
             "instance": task["instance"],
+            "horizon": task["horizon"],
             "seed": task["seed"],
+            "scorer": task.get("scorer", "gra"),
             "attempts": task["attempts"],
         }
 
 
 @app.post("/complete_task")
 def complete_task(payload: CompleteTaskRequest) -> dict[str, Any]:
-    wanted = (payload.instance, payload.seed)
+    wanted = (payload.instance, payload.horizon, payload.seed, payload.scorer)
 
     with lock:
         state = load_state()
@@ -200,11 +225,23 @@ def complete_task(payload: CompleteTaskRequest) -> dict[str, Any]:
                 completed["completion_status"] = payload.status
                 state["Completed"].append(completed)
                 save_state(state)
-                return {"message": "completed", "instance": payload.instance, "seed": payload.seed}
+                return {
+                    "message": "completed",
+                    "instance": payload.instance,
+                    "horizon": payload.horizon,
+                    "seed": payload.seed,
+                    "scorer": payload.scorer,
+                }
 
         for task in state["Completed"]:
             if task_key(task) == wanted:
-                return {"message": "already_completed", "instance": payload.instance, "seed": payload.seed}
+                return {
+                    "message": "already_completed",
+                    "instance": payload.instance,
+                    "horizon": payload.horizon,
+                    "seed": payload.seed,
+                    "scorer": payload.scorer,
+                }
 
         save_state(state)
         raise HTTPException(status_code=404, detail="Task not found in In_Progress")
