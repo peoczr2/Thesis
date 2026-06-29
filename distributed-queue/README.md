@@ -2,6 +2,8 @@
 
 This folder contains a small central coordinator and Julia worker client for running MIRP jobs across Windows lab machines.
 
+For AWS Spot workers, use the hybrid AMI setup in `aws/README.md`: keep Julia and heavy packages precompiled on the AMI, then pull the latest repo with git at boot.
+
 The server owns the queue in `task_queue.json`. Workers repeatedly pull one task, run it, and post completion. If a worker disappears, any task left `In_Progress` for more than 4 hours is automatically returned to `Pending`.
 
 ## Files

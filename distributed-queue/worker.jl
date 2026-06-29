@@ -9,6 +9,7 @@ const WORKER_ID = get(ENV, "WORKER_ID", "$(gethostname())-$(getpid())")
 const MAX_RETRIES = parse(Int, get(ENV, "QUEUE_MAX_RETRIES", "8"))
 const RETRY_SECONDS = parse(Float64, get(ENV, "QUEUE_RETRY_SECONDS", "10"))
 const RESULTS_DIR = get(ENV, "QUEUE_RESULTS_DIR", joinpath(@__DIR__, "..", "results", "distributed_queue"))
+const REQUEST_HEADERS = ["ngrok-skip-browser-warning" => "true"]
 
 include(joinpath(@__DIR__, "..", "replication_runner.jl"))
 
@@ -29,7 +30,7 @@ end
 function get_task()
     encoded_worker = HTTP.escapeuri(WORKER_ID)
     response = request_with_retry("GET /get_task") do
-        HTTP.get("$(SERVER_URL)/get_task?worker_id=$(encoded_worker)"; readtimeout = 60)
+        HTTP.get("$(SERVER_URL)/get_task?worker_id=$(encoded_worker)", REQUEST_HEADERS; readtimeout = 60)
     end
     return JSON3.read(String(response.body))
 end
@@ -56,7 +57,7 @@ function complete_task(
     response = request_with_retry("POST /complete_task") do
         HTTP.post(
             "$(SERVER_URL)/complete_task",
-            ["Content-Type" => "application/json"],
+            ["Content-Type" => "application/json"; REQUEST_HEADERS],
             body;
             readtimeout = 60,
         )
