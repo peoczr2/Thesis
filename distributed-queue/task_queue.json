@@ -1,58 +1,54 @@
 {
-  "Completed": [
+  "Completed": [],
+  "Failed": [],
+  "In_Progress": [],
+  "Pending": [
     {
-      "attempts": 1,
-      "completed_at": "2026-06-30T17:15:49.524347+00:00",
-      "completion_status": "completed",
-      "created_at": "2026-06-30T17:13:17.354159+00:00",
+      "attempts": 0,
+      "completed_at": null,
+      "created_at": "2026-06-30T17:33:07.957873+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC01_V6a",
-      "result_path": "/home/kingrix/projects/beam_search_thesis/results/distributed_queue_local/bs_ils_gra_LR1_DR02_VC01_V6a_h120_seed1_local-test-1_20260630_171538.csv",
-      "runtime_seconds": 88.39345288276672,
+      "result_path": null,
+      "runtime_seconds": null,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T17:14:09.752204+00:00",
-      "state": "Completed",
-      "worker_id": "local-test-1"
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
     },
     {
-      "attempts": 1,
-      "completed_at": "2026-06-30T17:17:53.383073+00:00",
-      "completion_status": "completed",
-      "created_at": "2026-06-30T17:13:17.354168+00:00",
+      "attempts": 0,
+      "completed_at": null,
+      "created_at": "2026-06-30T17:33:07.957882+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC02_V6a",
-      "result_path": "/home/kingrix/projects/beam_search_thesis/results/distributed_queue_local/bs_ils_gra_LR1_DR02_VC02_V6a_h120_seed1_local-test-1_20260630_171753.csv",
-      "runtime_seconds": 123.70666909217834,
+      "result_path": null,
+      "runtime_seconds": null,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T17:15:49.674676+00:00",
-      "state": "Completed",
-      "worker_id": "local-test-1"
-    }
-  ],
-  "Failed": [],
-  "In_Progress": [
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
+    },
     {
-      "attempts": 1,
+      "attempts": 0,
       "completed_at": null,
-      "created_at": "2026-06-30T17:13:17.354171+00:00",
+      "created_at": "2026-06-30T17:33:07.957884+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC03_V7a",
       "result_path": null,
       "runtime_seconds": null,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T17:17:53.384358+00:00",
-      "state": "In_Progress",
-      "worker_id": "local-test-1"
-    }
-  ],
-  "Pending": [
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
+    },
     {
       "attempts": 0,
       "completed_at": null,
-      "created_at": "2026-06-30T17:13:17.354172+00:00",
+      "created_at": "2026-06-30T17:33:07.957886+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC03_V8a",
       "result_path": null,
@@ -66,9 +62,23 @@
     {
       "attempts": 0,
       "completed_at": null,
-      "created_at": "2026-06-30T17:13:17.354174+00:00",
+      "created_at": "2026-06-30T17:33:07.957887+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC04_V8a",
+      "result_path": null,
+      "runtime_seconds": null,
+      "scorer": "gra",
+      "seed": 1,
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "created_at": "2026-06-30T17:33:07.957889+00:00",
+      "horizon": 120,
+      "instance": "LR1_DR02_VC05_V8a",
       "result_path": null,
       "runtime_seconds": null,
       "scorer": "gra",

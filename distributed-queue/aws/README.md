@@ -82,6 +82,8 @@ REPO_URL="https://github.com/peoczr2/Thesis.git"
 REPO_BRANCH="main"
 APP_USER="ubuntu"
 WORKERS_PER_INSTANCE="1"
+SHUTDOWN_ON_SUCCESS="false"
+SHUTDOWN_ON_FAILURE="false"
 ```
 
 The user-data script installs `git` if it is missing, then runs:
@@ -101,7 +103,7 @@ Use `WORKERS_PER_INSTANCE=1` unless you know one machine can run multiple optimi
 
 The `~/.julia` user-context issue is real. Do not run Julia package setup as root. `prepare-base-ami.sh` and `user-data-worker.sh` force git and Julia through `sudo -H -u "$APP_USER"` to keep the Julia depot under `/home/ubuntu/.julia`.
 
-The ghost-worker issue is solved by the Launch Template user-data: every new instance runs `user-data-worker.sh` at boot, starts the worker, and shuts down when the queue is drained. A systemd service is only needed if you want the AMI to auto-run workers without Launch Template user-data.
+The ghost-worker issue is solved by the Launch Template user-data: every new instance runs `user-data-worker.sh` at boot and starts the worker. During debugging, keep `SHUTDOWN_ON_SUCCESS=false` and `SHUTDOWN_ON_FAILURE=false` so the instance stays alive for SSH/log inspection. For production Spot batches, set `SHUTDOWN_ON_SUCCESS=true` after the worker is proven healthy so instances stop when the queue is drained. A systemd service is only needed if you want the AMI to auto-run workers without Launch Template user-data.
 
 ## 4. Launch The Spot Fleet
 
@@ -112,7 +114,7 @@ cd distributed-queue/aws
 LAUNCH_TEMPLATE_NAME=thesis-worker-template COUNT=40 ./run-spot-workers.sh
 ```
 
-The instances will boot, pull latest GitHub code, run `distributed-queue/worker.jl`, drain tasks from your ngrok queue, and shut themselves down when no tasks remain.
+The instances will boot, pull latest GitHub code, run `distributed-queue/worker.jl`, and drain tasks from your ngrok queue. They shut themselves down only when `SHUTDOWN_ON_SUCCESS=true` in the Launch Template user-data.
 
 ## 5. Iterate
 
@@ -130,10 +132,16 @@ If you add Julia packages, rebuild the AMI by rerunning `prepare-base-ami.sh` on
 
 ## Logs
 
-On an EC2 worker:
+On an EC2 worker started by Launch Template user-data:
 
 ```bash
 sudo tail -f /var/log/mirp-worker.log
+```
+
+On the AMI/base instance when you run `./user-data-worker.sh` manually as `ubuntu`:
+
+```bash
+tail -f ~/mirp-worker.log
 ```
 
 The queue server status remains the source of truth:

@@ -11,8 +11,21 @@ APP_DIR="${APP_DIR:-/home/ubuntu/app}"
 APP_USER="${APP_USER:-ubuntu}"
 WORKERS_PER_INSTANCE="${WORKERS_PER_INSTANCE:-1}"
 RESULTS_DIR="${RESULTS_DIR:-/home/ubuntu/results/distributed_queue}"
-SHUTDOWN_ON_SUCCESS="${SHUTDOWN_ON_SUCCESS:-true}"
+SHUTDOWN_ON_SUCCESS="${SHUTDOWN_ON_SUCCESS:-false}"
 SHUTDOWN_ON_FAILURE="${SHUTDOWN_ON_FAILURE:-false}"
+
+# Manual AMI tests often run this script from inside APP_DIR. Because the script
+# git-resets APP_DIR, re-exec from /tmp first so bash is not reading a file that
+# gets overwritten halfway through execution.
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+APP_DIR_ABS="$(readlink -m "${APP_DIR}")"
+if [[ "${MIRP_WORKER_SCRIPT_REEXEC:-0}" != "1" && "${SCRIPT_PATH}" == "${APP_DIR_ABS}"/* ]]; then
+    TMP_SCRIPT="$(mktemp /tmp/mirp-user-data-worker.XXXXXX.sh)"
+    cp "${SCRIPT_PATH}" "${TMP_SCRIPT}"
+    chmod +x "${TMP_SCRIPT}"
+    export MIRP_WORKER_SCRIPT_REEXEC=1
+    exec "${TMP_SCRIPT}" "$@"
+fi
 
 if [[ "${EUID}" -eq 0 ]]; then
     LOG_FILE="${LOG_FILE:-/var/log/mirp-worker.log}"

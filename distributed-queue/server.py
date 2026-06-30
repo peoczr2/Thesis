@@ -26,10 +26,10 @@ DEFAULT_INSTANCES = [
     "LR1_DR02_VC03_V7a",
     "LR1_DR02_VC03_V8a",
     "LR1_DR02_VC04_V8a",
+    "LR1_DR02_VC05_V8a",
 
 ]
 """
-    "LR1_DR02_VC05_V8a",
     "LR1_DR03_VC03_V10b",
     "LR1_DR03_VC03_V13b",
     "LR1_DR03_VC03_V16a",
