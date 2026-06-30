@@ -14,7 +14,16 @@ RESULTS_DIR="${RESULTS_DIR:-/home/ubuntu/results/distributed_queue}"
 SHUTDOWN_ON_SUCCESS="${SHUTDOWN_ON_SUCCESS:-true}"
 SHUTDOWN_ON_FAILURE="${SHUTDOWN_ON_FAILURE:-false}"
 
-exec > >(tee -a /var/log/mirp-worker.log | logger -t mirp-worker -s 2>/dev/console) 2>&1
+if [[ "${EUID}" -eq 0 ]]; then
+    LOG_FILE="${LOG_FILE:-/var/log/mirp-worker.log}"
+    SUDO=()
+    exec > >(tee -a "${LOG_FILE}" | logger -t mirp-worker) 2>&1
+else
+    LOG_FILE="${LOG_FILE:-${HOME}/mirp-worker.log}"
+    SUDO=(sudo)
+    exec > >(tee -a "${LOG_FILE}") 2>&1
+    echo "[$(date --iso-8601=seconds)] Running outside EC2 user-data as $(id -un); using sudo for root actions"
+fi
 
 if [[ "${QUEUE_SERVER}" == *"YOUR-NGROK-URL"* ]] || [[ "${REPO_URL}" == *"yourusername"* ]]; then
     echo "Edit QUEUE_SERVER and REPO_URL in user-data-worker.sh before launching AWS workers."
@@ -30,18 +39,18 @@ echo "Shutdown on failure: ${SHUTDOWN_ON_FAILURE}"
 
 if ! command -v git >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y ca-certificates git
+    "${SUDO[@]}" apt-get update
+    "${SUDO[@]}" apt-get install -y ca-certificates git
 fi
 
-install -d -o "${APP_USER}" -g "${APP_USER}" "$(dirname "${APP_DIR}")"
-install -d -o "${APP_USER}" -g "${APP_USER}" "${RESULTS_DIR}"
+"${SUDO[@]}" install -d -o "${APP_USER}" -g "${APP_USER}" "$(dirname "${APP_DIR}")"
+"${SUDO[@]}" install -d -o "${APP_USER}" -g "${APP_USER}" "${RESULTS_DIR}"
 
 if [ ! -d "${APP_DIR}/.git" ]; then
-    rm -rf "${APP_DIR}"
+    "${SUDO[@]}" rm -rf "${APP_DIR}"
     sudo -H -u "${APP_USER}" git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
 else
-    chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
+    "${SUDO[@]}" chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
     sudo -H -u "${APP_USER}" git -C "${APP_DIR}" remote set-url origin "${REPO_URL}"
     sudo -H -u "${APP_USER}" git -C "${APP_DIR}" fetch origin "${REPO_BRANCH}"
     sudo -H -u "${APP_USER}" git -C "${APP_DIR}" reset --hard "origin/${REPO_BRANCH}"
@@ -72,11 +81,11 @@ echo "[$(date --iso-8601=seconds)] Worker processes finished with status ${statu
 
 if [[ "${status}" == "0" && "${SHUTDOWN_ON_SUCCESS}" == "true" ]]; then
     echo "[$(date --iso-8601=seconds)] Shutting down after successful worker run"
-    sudo shutdown -h now
+    "${SUDO[@]}" shutdown -h now
 elif [[ "${status}" != "0" && "${SHUTDOWN_ON_FAILURE}" == "true" ]]; then
     echo "[$(date --iso-8601=seconds)] Shutting down after failed worker run"
-    sudo shutdown -h now
+    "${SUDO[@]}" shutdown -h now
 else
     echo "[$(date --iso-8601=seconds)] Leaving instance running for inspection"
-    echo "Inspect logs with: sudo tail -200 /var/log/mirp-worker.log"
+    echo "Inspect logs with: tail -200 ${LOG_FILE}"
 fi

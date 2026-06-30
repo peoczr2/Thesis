@@ -1,82 +1,80 @@
 {
-  "Completed": [],
-  "Failed": [
+  "Completed": [
     {
-      "attempts": 3,
-      "completed_at": null,
-      "created_at": "2026-06-30T13:05:41.774475+00:00",
-      "failed_at": "2026-06-30T17:03:02.739985+00:00",
+      "attempts": 1,
+      "completed_at": "2026-06-30T17:15:49.524347+00:00",
+      "completion_status": "completed",
+      "created_at": "2026-06-30T17:13:17.354159+00:00",
       "horizon": 120,
-      "instance": "LR1_DR02_VC03_V8a",
-      "last_error": "MethodError: no method matching score_successors!(::GRABeamScorer, ::MIRP, ::Vector{Solution}, ::Int64; rng::MersenneTwister)\nThe function `score_successors!` exists, but no method is defined for this combination of argument types.\n\nClosest candidates are:\n  score_successors!(::GRABeamScorer, ::MIRP, ::Vector{Solution}, ::Int64, !Matched::Int64; rng)\n   @ Main ~/projects/beam_search_thesis/beam_search/beam_scorers.jl:75\n  score_successors!(!Matched::PredictiveBeamScorer, ::MIRP, ::Vector{Solution}, ::Int64, !Matched::Int64; rng)\n   @ Main ~/projects/beam_search_thesis/beam_search/beam_scorers.jl:90\n\nStacktrace:\n  [1] expand_node(mirp::MIRP, node::Solution, w::Int64, model::GRABeamScorer; rng::MersenneTwister)\n    @ Main ~/projects/beam_search_thesis/beam_search/beam_search.jl:135\n  [2] beam_search(mirp::MIRP; N::Int64, w::Int64, q::Int64, rng::MersenneTwister, model::GRABeamScorer)\n    @ Main ~/projects/beam_search_thesis/beam_search/beam_search.jl:160\n  [3] beam_search\n    @ ~/projects/beam_search_thesis/beam_search/beam_search.jl:140 [inlined]\n  [4] macro expansion\n    @ ./timing.jl:461 [inlined]\n  [5] run_instance(instance::Symbol, horizon::Int64, seed::Int64; N::Int64, w::Int64, q::Int64, scorer::Symbol, surrogate_model::Symbol, surrogate_warmup_levels::Int64, surrogate_min_samples::Int64, surrogate_lambda::Float64, surrogate_shortlist_multiplier::Int64, surrogate_forest_trees::Int64, ils_params::ILSParameters)\n    @ Main ~/projects/beam_search_thesis/replication_runner.jl:185\n  [6] run_instance\n    @ ~/projects/beam_search_thesis/replication_runner.jl:153 [inlined]\n  [7] run_optimization(instance::String, horizon::Int64, seed::Int64, scorer::String)\n    @ Main ~/projects/beam_search_thesis/distributed-queue/worker.jl:111\n  [8] main()\n    @ Main ~/projects/beam_search_thesis/distributed-queue/worker.jl:136\n  [9] top-level scope\n    @ ~/projects/beam_search_thesis/distributed-queue/worker.jl:158\n [10] include(mod::Module, _path::String)\n    @ Base ./Base.jl:306\n [11] exec_options(opts::Base.JLOptions)\n    @ Base ./client.jl:317\n [12] _start()\n    @ Base ./client.jl:550",
-      "result_path": null,
-      "runtime_seconds": 0.0007109642028808594,
+      "instance": "LR1_DR02_VC01_V6a",
+      "result_path": "/home/kingrix/projects/beam_search_thesis/results/distributed_queue_local/bs_ils_gra_LR1_DR02_VC01_V6a_h120_seed1_local-test-1_20260630_171538.csv",
+      "runtime_seconds": 88.39345288276672,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T17:03:02.736059+00:00",
-      "state": "Failed",
-      "worker_id": "local-test-1"
-    },
-    {
-      "attempts": 3,
-      "completed_at": null,
-      "created_at": "2026-06-30T13:05:41.774476+00:00",
-      "failed_at": "2026-06-30T17:03:02.744854+00:00",
-      "horizon": 120,
-      "instance": "LR1_DR02_VC04_V8a",
-      "last_error": "MethodError: no method matching score_successors!(::GRABeamScorer, ::MIRP, ::Vector{Solution}, ::Int64; rng::MersenneTwister)\nThe function `score_successors!` exists, but no method is defined for this combination of argument types.\n\nClosest candidates are:\n  score_successors!(::GRABeamScorer, ::MIRP, ::Vector{Solution}, ::Int64, !Matched::Int64; rng)\n   @ Main ~/projects/beam_search_thesis/beam_search/beam_scorers.jl:75\n  score_successors!(!Matched::PredictiveBeamScorer, ::MIRP, ::Vector{Solution}, ::Int64, !Matched::Int64; rng)\n   @ Main ~/projects/beam_search_thesis/beam_search/beam_scorers.jl:90\n\nStacktrace:\n  [1] expand_node(mirp::MIRP, node::Solution, w::Int64, model::GRABeamScorer; rng::MersenneTwister)\n    @ Main ~/projects/beam_search_thesis/beam_search/beam_search.jl:135\n  [2] beam_search(mirp::MIRP; N::Int64, w::Int64, q::Int64, rng::MersenneTwister, model::GRABeamScorer)\n    @ Main ~/projects/beam_search_thesis/beam_search/beam_search.jl:160\n  [3] beam_search\n    @ ~/projects/beam_search_thesis/beam_search/beam_search.jl:140 [inlined]\n  [4] macro expansion\n    @ ./timing.jl:461 [inlined]\n  [5] run_instance(instance::Symbol, horizon::Int64, seed::Int64; N::Int64, w::Int64, q::Int64, scorer::Symbol, surrogate_model::Symbol, surrogate_warmup_levels::Int64, surrogate_min_samples::Int64, surrogate_lambda::Float64, surrogate_shortlist_multiplier::Int64, surrogate_forest_trees::Int64, ils_params::ILSParameters)\n    @ Main ~/projects/beam_search_thesis/replication_runner.jl:185\n  [6] run_instance\n    @ ~/projects/beam_search_thesis/replication_runner.jl:153 [inlined]\n  [7] run_optimization(instance::String, horizon::Int64, seed::Int64, scorer::String)\n    @ Main ~/projects/beam_search_thesis/distributed-queue/worker.jl:111\n  [8] main()\n    @ Main ~/projects/beam_search_thesis/distributed-queue/worker.jl:136\n  [9] top-level scope\n    @ ~/projects/beam_search_thesis/distributed-queue/worker.jl:158\n [10] include(mod::Module, _path::String)\n    @ Base ./Base.jl:306\n [11] exec_options(opts::Base.JLOptions)\n    @ Base ./client.jl:317\n [12] _start()\n    @ Base ./client.jl:550",
-      "result_path": null,
-      "runtime_seconds": 0.0007109642028808594,
-      "scorer": "gra",
-      "seed": 1,
-      "started_at": "2026-06-30T17:03:02.741051+00:00",
-      "state": "Failed",
+      "started_at": "2026-06-30T17:14:09.752204+00:00",
+      "state": "Completed",
       "worker_id": "local-test-1"
     }
   ],
+  "Failed": [],
   "In_Progress": [
     {
       "attempts": 1,
       "completed_at": null,
-      "created_at": "2026-06-30T13:05:41.774461+00:00",
-      "horizon": 120,
-      "instance": "LR1_DR02_VC01_V6a",
-      "result_path": null,
-      "runtime_seconds": null,
-      "scorer": "gra",
-      "seed": 1,
-      "started_at": "2026-06-30T13:20:32.484266+00:00",
-      "state": "In_Progress",
-      "worker_id": "ip-172-31-35-26-1"
-    },
-    {
-      "attempts": 1,
-      "completed_at": null,
-      "created_at": "2026-06-30T13:05:41.774471+00:00",
+      "created_at": "2026-06-30T17:13:17.354168+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC02_V6a",
       "result_path": null,
       "runtime_seconds": null,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T13:20:33.386593+00:00",
+      "started_at": "2026-06-30T17:15:49.674676+00:00",
       "state": "In_Progress",
-      "worker_id": "ip-172-31-38-176-1"
-    },
+      "worker_id": "local-test-1"
+    }
+  ],
+  "Pending": [
     {
-      "attempts": 1,
+      "attempts": 0,
       "completed_at": null,
-      "created_at": "2026-06-30T13:05:41.774473+00:00",
+      "created_at": "2026-06-30T17:13:17.354171+00:00",
       "horizon": 120,
       "instance": "LR1_DR02_VC03_V7a",
       "result_path": null,
       "runtime_seconds": null,
       "scorer": "gra",
       "seed": 1,
-      "started_at": "2026-06-30T13:20:38.301049+00:00",
-      "state": "In_Progress",
-      "worker_id": "ip-172-31-39-203-1"
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "created_at": "2026-06-30T17:13:17.354172+00:00",
+      "horizon": 120,
+      "instance": "LR1_DR02_VC03_V8a",
+      "result_path": null,
+      "runtime_seconds": null,
+      "scorer": "gra",
+      "seed": 1,
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
+    },
+    {
+      "attempts": 0,
+      "completed_at": null,
+      "created_at": "2026-06-30T17:13:17.354174+00:00",
+      "horizon": 120,
+      "instance": "LR1_DR02_VC04_V8a",
+      "result_path": null,
+      "runtime_seconds": null,
+      "scorer": "gra",
+      "seed": 1,
+      "started_at": null,
+      "state": "Pending",
+      "worker_id": null
     }
-  ],
-  "Pending": []
+  ]
 }

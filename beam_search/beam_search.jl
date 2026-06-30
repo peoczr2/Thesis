@@ -23,7 +23,7 @@ function keep_best_N_unique(nodes::Vector{Solution}, N::Int64)
     seen_scores = sizehint!(Set{Float64}(), N)
 
     sorted_nodes = filter(node -> node.feasible && isfinite(node.score), nodes)
-    sort!(valid_nodes, by = node -> node.score)
+    sort!(sorted_nodes, by = node -> node.score)
 
     for node in sorted_nodes
         key = score_key(node)
@@ -45,8 +45,8 @@ Both best_n and candidates must be SORTED ascending by score.
 """
 function keep_best_N_solutions!(
     best_n::Vector{Solution}, 
-    candidates::Vector{Solution}, 
-    scratch::Vector{Solution}, 
+    sorted_candidates::Vector{Solution}, 
+    helper::Vector{Solution}, 
     N::Int
 )
     i = 1
@@ -55,13 +55,13 @@ function keep_best_N_solutions!(
     
     len_b = length(best_n)
     len_c = length(sorted_candidates)
-    
-    # No candidate is better than the Nth best_n
+
+    # No candidate is better than the Nth best_n.
     if len_b == N && !isempty(sorted_candidates) && sorted_candidates[1].score >= best_n[end].score
         return best_n
     end
 
-    # Merge the two sorted lists until the best N
+    # Merge the two sorted lists until the best N.
     while k <= N
         if i <= len_b && (j > len_c || best_n[i].score <= sorted_candidates[j].score)
             helper[k] = best_n[i]
@@ -74,11 +74,11 @@ function keep_best_N_solutions!(
         end
         k += 1
     end
-    
-    # maybe there is not yet N solutions
+
+    # Maybe there are not yet N solutions.
     actual_size = k - 1
     resize!(best_n, actual_size)
-    
+
     for idx in 1:actual_size
         best_n[idx] = helper[idx]
     end
@@ -120,6 +120,7 @@ function expand_node(
     mirp::MIRP,
     node::Solution,
     w::Int64,
+    level::Int64,
     model::AbstractNodeScorer;
     rng::AbstractRNG = Random.default_rng(),
 )
@@ -132,7 +133,7 @@ function expand_node(
         successor.feasible && push!(successors, successor)
     end
 
-    return score_successors!(model, mirp, successors, w; rng = rng)
+    return score_successors!(model, mirp, successors, w, level; rng = rng)
 end
 
 # Main beam loop: expand a frontier, globally retain the best N successors, and
@@ -149,7 +150,7 @@ function beam_search(
 
     initial_node = evaluate_solution!(mirp, Solution(mirp); add_final_inventory_cost = false) # TODO: maybe create an initial node with the initial things from the mirp data, like for vessels intial port etc
     beam_nodes = [initial_node]
-    best_n = Vector{Solution}(undef, N)
+    best_n = sizehint!(Solution[], N)
     best_n_helper = Vector{Solution}(undef, N)
     levels = 0
 
@@ -157,7 +158,7 @@ function beam_search(
         successors = Solution[]
 
         for node in beam_nodes
-            node_successors, completed_solutions = expand_node(mirp, node, w, model; rng = rng)
+            node_successors, completed_solutions = expand_node(mirp, node, w, levels, model; rng = rng)
             append!(successors, node_successors)
             keep_best_N_solutions!(best_n, completed_solutions, best_n_helper, N)
         end
