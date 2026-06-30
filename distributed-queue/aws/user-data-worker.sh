@@ -4,8 +4,8 @@ set -euo pipefail
 # Paste this into EC2 Launch Template > Advanced details > User data.
 # This uses git at launch: install git if missing, pull latest code, run workers.
 
-QUEUE_SERVER="${QUEUE_SERVER:-https://YOUR-NGROK-URL.ngrok-free.app}"
-REPO_URL="${REPO_URL:-https://github.com/yourusername/beam_search_thesis.git}"
+QUEUE_SERVER="${QUEUE_SERVER:-https://2488-2001-4c4c-1921-f700-91d5-3307-bb54-70e0.ngrok-free.app}"
+REPO_URL="${REPO_URL:-https://github.com/peoczr2/Thesis.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/home/ubuntu/app}"
 APP_USER="${APP_USER:-ubuntu}"

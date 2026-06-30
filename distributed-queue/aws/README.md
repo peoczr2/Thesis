@@ -35,7 +35,7 @@ ngrok http 8000
 Check the queue:
 
 ```bash
-curl https://YOUR-NGROK-URL.ngrok-free.app/status
+curl https://2488-2001-4c4c-1921-f700-91d5-3307-bb54-70e0.ngrok-free.app/status
 ```
 
 ## 2. Build The Base AMI Once
@@ -77,8 +77,8 @@ Recommended settings:
 Paste `user-data-worker.sh` into Advanced details > User data, and edit these values at the top:
 
 ```bash
-QUEUE_SERVER="https://YOUR-NGROK-URL.ngrok-free.app"
-REPO_URL="https://github.com/yourusername/beam_search_thesis.git"
+QUEUE_SERVER="https://2488-2001-4c4c-1921-f700-91d5-3307-bb54-70e0.ngrok-free.app"
+REPO_URL="https://github.com/peoczr2/Thesis.git"
 REPO_BRANCH="main"
 APP_USER="ubuntu"
 WORKERS_PER_INSTANCE="1"
@@ -139,5 +139,5 @@ sudo tail -f /var/log/mirp-worker.log
 The queue server status remains the source of truth:
 
 ```bash
-curl https://YOUR-NGROK-URL.ngrok-free.app/status
+curl https://2488-2001-4c4c-1921-f700-91d5-3307-bb54-70e0.ngrok-free.app/status
 ```

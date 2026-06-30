@@ -6,7 +6,7 @@ set -euo pipefail
 
 JULIA_VERSION="${JULIA_VERSION:-1.11.9}"
 JULIA_MINOR="${JULIA_VERSION%.*}"
-REPO_URL="${REPO_URL:-https://github.com/yourusername/beam_search_thesis.git}"
+REPO_URL="${REPO_URL:-https://github.com/peoczr2/Thesis.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/home/ubuntu/app}"
 APP_USER="${APP_USER:-ubuntu}"
