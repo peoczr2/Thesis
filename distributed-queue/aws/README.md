@@ -109,7 +109,7 @@ From any machine with AWS CLI configured:
 
 ```bash
 cd distributed-queue/aws
-LAUNCH_TEMPLATE_NAME=julia-worker-template COUNT=40 ./run-spot-workers.sh
+LAUNCH_TEMPLATE_NAME=thesis-worker-template COUNT=40 ./run-spot-workers.sh
 ```
 
 The instances will boot, pull latest GitHub code, run `distributed-queue/worker.jl`, drain tasks from your ngrok queue, and shut themselves down when no tasks remain.

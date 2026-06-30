@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Convenience wrapper after your Launch Template has the AMI and user-data set.
 
-LAUNCH_TEMPLATE_NAME="${LAUNCH_TEMPLATE_NAME:-julia-worker-template}"
+LAUNCH_TEMPLATE_NAME="${LAUNCH_TEMPLATE_NAME:-thesis-worker-template}"
 LAUNCH_TEMPLATE_VERSION="${LAUNCH_TEMPLATE_VERSION:-1}"
 COUNT="${COUNT:-40}"
 
