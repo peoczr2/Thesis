@@ -437,11 +437,8 @@ function score_insert!(
     status = evaluate_call!(evaluator, mirp, first_port, vessel)
     status === :infeasible && return Inf
     status === :discarded && return Inf
-    if status !== :discarded
-        status = evaluate_call!(evaluator, mirp, second_port, vessel)
-        status === :infeasible && return Inf
-        status === :discarded && return Inf
-    end
+    status = evaluate_call!(evaluator, mirp, second_port, vessel)
+    status === :infeasible && return Inf
     return final_evaluate_score(evaluator, mirp)
 end
 

@@ -39,22 +39,25 @@ function keep_best_N_unique(nodes::Vector{Solution}, N::Int64)
 end
 
 """
-Modifies pool in place to efficiently keep the best N solutions from the 
+Modifies pool in place to efficiently keep the best N unique solutions from the 
 previously saved N solutions and the new candidates using a pre-allocated scratch vector.
 Both best_n and candidates must be SORTED ascending by score.
 """
 function keep_best_N_solutions!(
-    best_n::Vector{Solution}, 
-    sorted_candidates::Vector{Solution}, 
-    helper::Vector{Solution}, 
+    best_n::Vector{Solution},
+    sorted_candidates::Vector{Solution},
+    helper::Vector{Solution},
     N::Int
 )
     i = 1
     j = 1
     k = 1
+
     len_b = length(best_n)
     len_c = length(sorted_candidates)
-    seen_scores = sizehint!(Set{Float64}(), N)
+
+    last_key = nothing
+    have_last_key = false
 
     while k <= N && (i <= len_b || j <= len_c)
         if i <= len_b && (j > len_c || best_n[i].score <= sorted_candidates[j].score)
@@ -65,12 +68,15 @@ function keep_best_N_solutions!(
             j += 1
         end
 
-        (candidate.feasible && isfinite(candidate.score)) || continue
-        key = score_key(candidate)
-        key in seen_scores && continue
+        !candidate.feasible || !isfinite(candidate.score) && continue
 
-        push!(seen_scores, key)
+        key = score_key(candidate)
+
+        have_last_key && key == last_key && continue
+
         helper[k] = candidate
+        last_key = key
+        have_last_key = true
         k += 1
     end
 

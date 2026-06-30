@@ -129,6 +129,8 @@ function insert_neighbor!(
 )
     for first_port in ordered_items(rng, mirp.ports, randomize)
         for vessel in ordered_items(rng, mirp.vessels, randomize)
+            is_feasible(solution, first_port, vessel) || continue
+
             for port in ordered_items(rng, mirp.ports, randomize)
                 port.type == first_port.type && continue
 
