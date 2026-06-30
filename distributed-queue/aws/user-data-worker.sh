@@ -70,7 +70,7 @@ else
 fi
 
 cd "${APP_DIR}/distributed-queue"
-sudo -H -u "${APP_USER}" julia --project=. -e 'using Pkg; Pkg.instantiate()'
+sudo -H -u "${APP_USER}" julia --project=. setup.jl
 
 pids=()
 for worker_index in $(seq 1 "${WORKERS_PER_INSTANCE}"); do

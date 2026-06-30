@@ -62,6 +62,8 @@ This AMI contains:
 - the `distributed-queue` Julia environment
 - precompiled Julia packages under `/home/ubuntu/.julia`
 
+`distributed-queue/setup.jl` reads `Manifest.toml` and exits immediately if the running Julia version does not exactly match the manifest `julia_version`. Package versions are pinned by `Manifest.toml`; setup does not run `Pkg.add`, `Pkg.resolve`, or `Pkg.update`.
+
 ## 3. Create The Launch Template
 
 Create an EC2 Launch Template using the AMI from step 2.
