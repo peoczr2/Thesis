@@ -52,37 +52,35 @@ function keep_best_N_solutions!(
     i = 1
     j = 1
     k = 1
-    
     len_b = length(best_n)
     len_c = length(sorted_candidates)
+    seen_scores = sizehint!(Set{Float64}(), N)
 
-    # No candidate is better than the Nth best_n.
-    if len_b == N && !isempty(sorted_candidates) && sorted_candidates[1].score >= best_n[end].score
-        return best_n
-    end
-
-    # Merge the two sorted lists until the best N.
-    while k <= N
+    while k <= N && (i <= len_b || j <= len_c)
         if i <= len_b && (j > len_c || best_n[i].score <= sorted_candidates[j].score)
-            helper[k] = best_n[i]
+            candidate = best_n[i]
             i += 1
-        elseif j <= len_c
-            helper[k] = sorted_candidates[j]
-            j += 1
         else
-            break # Both sources completely exhausted
+            candidate = sorted_candidates[j]
+            j += 1
         end
+
+        (candidate.feasible && isfinite(candidate.score)) || continue
+        key = score_key(candidate)
+        key in seen_scores && continue
+
+        push!(seen_scores, key)
+        helper[k] = candidate
         k += 1
     end
 
-    # Maybe there are not yet N solutions.
     actual_size = k - 1
     resize!(best_n, actual_size)
 
     for idx in 1:actual_size
         best_n[idx] = helper[idx]
     end
-    
+
     return best_n
 end
 
@@ -160,6 +158,7 @@ function beam_search(
         for node in beam_nodes
             node_successors, completed_solutions = expand_node(mirp, node, w, levels, model; rng = rng)
             append!(successors, node_successors)
+            sort!(completed_solutions, by = solution -> solution.score)
             keep_best_N_solutions!(best_n, completed_solutions, best_n_helper, N)
         end
 

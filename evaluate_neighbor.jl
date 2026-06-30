@@ -436,9 +436,11 @@ function score_insert!(
     reset_evaluator_to_prefix!(evaluator, mirp, solution, length(solution.calls))
     status = evaluate_call!(evaluator, mirp, first_port, vessel)
     status === :infeasible && return Inf
+    status === :discarded && return Inf
     if status !== :discarded
         status = evaluate_call!(evaluator, mirp, second_port, vessel)
         status === :infeasible && return Inf
+        status === :discarded && return Inf
     end
     return final_evaluate_score(evaluator, mirp)
 end
