@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 import os
 import threading
@@ -11,6 +12,15 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 QUEUE_FILE = Path(os.environ.get("QUEUE_FILE", "task_queue.json"))
+DEFAULT_RESULTS_CSV = QUEUE_FILE.with_name(
+    f"server_run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+)
+RESULTS_CSV = Path(
+    os.environ.get(
+        "RESULTS_CSV",
+        str(DEFAULT_RESULTS_CSV),
+    )
+)
 STALE_HOURS = float(os.environ.get("STALE_HOURS", "4"))
 MAX_TASK_ATTEMPTS = int(os.environ.get("MAX_TASK_ATTEMPTS", "3"))
 DEFAULT_SEEDS = list(range(1, 2))
@@ -44,6 +54,38 @@ DEFAULT_INSTANCES = [
 app = FastAPI(title="Dynamic MIRP Task Queue", version="1.0.0")
 lock = threading.Lock()
 
+CSV_HEADERS = [
+    "instance",
+    "horizon",
+    "seed",
+    "N",
+    "w",
+    "q",
+    "beam_scorer",
+    "surrogate_model",
+    "surrogate_warmup_levels",
+    "surrogate_min_samples",
+    "surrogate_lambda",
+    "surrogate_forest_trees",
+    "surrogate_shortlist_multiplier",
+    "objective",
+    "bs_cost",
+    "ls_cost",
+    "ils_cost",
+    "bs_gap_pct",
+    "ls_gap_pct",
+    "ils_gap_pct",
+    "gap_pct",
+    "calls",
+    "levels",
+    "beam_pool",
+    "ls_improvements",
+    "beam_seconds",
+    "ls_seconds",
+    "ils_seconds",
+    "total_seconds",
+]
+
 
 class CompleteTaskRequest(BaseModel):
     instance: str
@@ -52,6 +94,7 @@ class CompleteTaskRequest(BaseModel):
     scorer: str = "gra"
     worker_id: str | None = None
     result_path: str | None = None
+    result: dict[str, Any] | None = None
     status: str = "completed"
     runtime_seconds: float | None = None
 
@@ -138,6 +181,32 @@ def save_state(state: dict[str, list[dict[str, Any]]]) -> None:
     tmp_file.replace(QUEUE_FILE)
 
 
+def result_sort_key(task: dict[str, Any]) -> tuple[int, int, str, str]:
+    result = task.get("result") if isinstance(task.get("result"), dict) else {}
+    return (
+        int(result.get("seed", task.get("seed", 0))),
+        int(result.get("horizon", task.get("horizon", 0))),
+        str(result.get("beam_scorer", task.get("scorer", ""))),
+        str(result.get("instance", task.get("instance", ""))),
+    )
+
+
+def write_results_csv(state: dict[str, list[dict[str, Any]]]) -> None:
+    rows = []
+    for task in sorted(state["Completed"], key=result_sort_key):
+        result = task.get("result")
+        if isinstance(result, dict):
+            rows.append({header: result.get(header, "") for header in CSV_HEADERS})
+
+    RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
+    tmp_file = RESULTS_CSV.with_suffix(RESULTS_CSV.suffix + ".tmp")
+    with tmp_file.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CSV_HEADERS)
+        writer.writeheader()
+        writer.writerows(rows)
+    tmp_file.replace(RESULTS_CSV)
+
+
 def task_key(task: dict[str, Any]) -> tuple[str, int, int, str]:
     return (
         str(task["instance"]),
@@ -172,6 +241,7 @@ def startup() -> None:
     with lock:
         state = load_state()
         reset_stale_tasks(state)
+        write_results_csv(state)
         save_state(state)
 
 
@@ -236,10 +306,12 @@ def complete_task(payload: CompleteTaskRequest) -> dict[str, Any]:
                 completed["state"] = "Completed"
                 completed["completed_at"] = now_iso()
                 completed["worker_id"] = payload.worker_id or completed.get("worker_id")
-                completed["result_path"] = payload.result_path
+                completed["result"] = payload.result
+                completed["result_path"] = str(RESULTS_CSV) if payload.result is not None else payload.result_path
                 completed["runtime_seconds"] = payload.runtime_seconds
                 completed["completion_status"] = payload.status
                 state["Completed"].append(completed)
+                write_results_csv(state)
                 save_state(state)
                 return {
                     "message": "completed",
@@ -247,16 +319,19 @@ def complete_task(payload: CompleteTaskRequest) -> dict[str, Any]:
                     "horizon": payload.horizon,
                     "seed": payload.seed,
                     "scorer": payload.scorer,
+                    "results_csv": str(RESULTS_CSV),
                 }
 
         for task in state["Completed"]:
             if task_key(task) == wanted:
+                write_results_csv(state)
                 return {
                     "message": "already_completed",
                     "instance": payload.instance,
                     "horizon": payload.horizon,
                     "seed": payload.seed,
                     "scorer": payload.scorer,
+                    "results_csv": str(RESULTS_CSV),
                 }
 
         save_state(state)

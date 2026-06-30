@@ -8,7 +8,6 @@ const SERVER_URL = get(ENV, "QUEUE_SERVER", "http://127.0.0.1:8000")
 const WORKER_ID = get(ENV, "WORKER_ID", "$(gethostname())-$(getpid())")
 const MAX_RETRIES = parse(Int, get(ENV, "QUEUE_MAX_RETRIES", "8"))
 const RETRY_SECONDS = parse(Float64, get(ENV, "QUEUE_RETRY_SECONDS", "10"))
-const RESULTS_DIR = get(ENV, "QUEUE_RESULTS_DIR", joinpath(@__DIR__, "..", "results", "distributed_queue"))
 const REQUEST_HEADERS = ["ngrok-skip-browser-warning" => "true"]
 
 include(joinpath(@__DIR__, "..", "replication_runner.jl"))
@@ -41,7 +40,7 @@ function complete_task(
     seed::Int,
     scorer::String;
     runtime_seconds::Union{Nothing, Float64} = nothing,
-    result_path::Union{Nothing, String} = nothing,
+    result::Union{Nothing, Dict{String, Any}} = nothing,
 )
     payload = Dict(
         "instance" => instance,
@@ -50,7 +49,7 @@ function complete_task(
         "scorer" => scorer,
         "worker_id" => WORKER_ID,
         "status" => "completed",
-        "result_path" => result_path,
+        "result" => result,
         "runtime_seconds" => runtime_seconds,
     )
     body = JSON3.write(payload)
@@ -98,10 +97,8 @@ function fail_task(
     return JSON3.read(String(response.body))
 end
 
-function result_filename(instance::String, horizon::Int, seed::Int, scorer::String)
-    stamp = Dates.format(now(), dateformat"yyyymmdd_HHMMSS")
-    safe_worker = replace(WORKER_ID, r"[^A-Za-z0-9_.-]" => "_")
-    return "bs_ils_$(scorer)_$(instance)_h$(horizon)_seed$(seed)_$(safe_worker)_$(stamp).csv"
+function row_payload(row)
+    return Dict(String(key) => getfield(row, key) for key in keys(row))
 end
 
 function run_optimization(instance::String, horizon::Int, seed::Int, scorer::String)
@@ -109,11 +106,8 @@ function run_optimization(instance::String, horizon::Int, seed::Int, scorer::Str
     started = time()
 
     row = run_instance(Symbol(instance), horizon, seed; scorer = Symbol(scorer))
-    mkpath(RESULTS_DIR)
-    result_path = joinpath(RESULTS_DIR, result_filename(instance, horizon, seed, scorer))
-    write_results_csv(result_path, [row])
 
-    return time() - started, result_path
+    return time() - started, row_payload(row)
 end
 
 function main()
@@ -133,8 +127,8 @@ function main()
         task_started = time()
 
         try
-            runtime_seconds, result_path = run_optimization(instance, horizon, seed, scorer)
-            response = complete_task(instance, horizon, seed, scorer; runtime_seconds = runtime_seconds, result_path = result_path)
+            runtime_seconds, result = run_optimization(instance, horizon, seed, scorer)
+            response = complete_task(instance, horizon, seed, scorer; runtime_seconds = runtime_seconds, result = result)
             println("Completed $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer): $(response)")
         catch err
             runtime_seconds = time() - task_started

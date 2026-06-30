@@ -10,7 +10,6 @@ REPO_BRANCH="${REPO_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/home/ubuntu/app}"
 APP_USER="${APP_USER:-ubuntu}"
 WORKERS_PER_INSTANCE="${WORKERS_PER_INSTANCE:-1}"
-RESULTS_DIR="${RESULTS_DIR:-/home/ubuntu/results/distributed_queue}"
 SHUTDOWN_ON_SUCCESS="${SHUTDOWN_ON_SUCCESS:-false}"
 SHUTDOWN_ON_FAILURE="${SHUTDOWN_ON_FAILURE:-false}"
 
@@ -77,7 +76,6 @@ for worker_index in $(seq 1 "${WORKERS_PER_INSTANCE}"); do
     worker_id="$(hostname)-${worker_index}"
     sudo -H -u "${APP_USER}" env \
         QUEUE_SERVER="${QUEUE_SERVER}" \
-        QUEUE_RESULTS_DIR="${RESULTS_DIR}" \
         WORKER_ID="${worker_id}" \
         julia --project=. worker.jl &
     pids+=("$!")

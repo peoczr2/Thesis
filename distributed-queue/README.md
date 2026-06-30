@@ -12,6 +12,7 @@ The server owns the queue in `task_queue.json`. Workers repeatedly pull one task
 - `setup.jl`: Julia environment setup for workers.
 - `worker.jl`: Julia pull-worker client with a dummy optimization workload.
 - `task_queue.json`: created automatically by the server on first start.
+- `server_run_YYYYMMDD_HHMMSS.csv`: created by the server as completed results arrive. Override with `RESULTS_CSV=/path/to/results.csv`.
 
 ## 1. Start The Python Server
 
@@ -108,6 +109,18 @@ curl http://127.0.0.1:8000/status
 ```
 
 The `pending` count should decrease and `completed` should increase until the queue is drained.
+
+Completed optimization rows are written by the server, not by the workers, to one CSV per queue file. With the default settings, each server start creates an output named like:
+
+```text
+server_run_20260630_184512.csv
+```
+
+The server rewrites this file while holding its queue lock, sorted by `seed`, then `horizon`, then `beam_scorer`, then `instance`. To choose another file:
+
+```bash
+RESULTS_CSV=/path/to/my_run.csv uv run --with fastapi --with uvicorn python -m uvicorn server:app --host 0.0.0.0 --port 8000
+```
 
 ## 4. Pause And Resume
 
