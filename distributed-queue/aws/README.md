@@ -57,7 +57,7 @@ This AMI contains:
 
 - Ubuntu packages needed by the worker
 - git
-- Julia 1.10
+- Julia 1.11 by default, because `MIRPLib` is incompatible with Julia 1.10
 - a patched Julia `libopenlibm.so` executable-stack flag for newer Ubuntu images
 - the `distributed-queue` Julia environment
 - precompiled Julia packages under `/home/ubuntu/.julia`
@@ -126,7 +126,7 @@ git push origin main
 
 Then launch another batch of Spot workers. They will reuse the precompiled environment from the AMI and pull only your updated scripts through git.
 
-If you add Julia packages, rebuild the AMI by rerunning `prepare-base-ami.sh` on a temporary instance and creating a new AMI.
+If you add Julia packages, rebuild the AMI by rerunning `prepare-base-ami.sh` on a temporary instance and creating a new AMI. `MIRPLib` requires a newer Julia than 1.10, so leave the script default at Julia 1.11 unless the package compat changes.
 
 ## Logs
 

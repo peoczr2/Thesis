@@ -4,7 +4,8 @@ set -euo pipefail
 # Run this once on a temporary Ubuntu EC2 instance, then create an AMI from it.
 # It installs Julia and precompiles the distributed queue worker environment.
 
-JULIA_VERSION="${JULIA_VERSION:-1.10.4}"
+JULIA_VERSION="${JULIA_VERSION:-1.11.9}"
+JULIA_MINOR="${JULIA_VERSION%.*}"
 REPO_URL="${REPO_URL:-https://github.com/yourusername/beam_search_thesis.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/home/ubuntu/app}"
@@ -13,12 +14,6 @@ APP_USER="${APP_USER:-ubuntu}"
 sudo apt-get update
 sudo apt-get install -y ca-certificates curl git tar gzip awscli patchelf
 
-if ! command -v julia >/dev/null 2>&1; then
-    curl -fsSL "https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" \
-        -o "/tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz"
-    sudo tar -xzf "/tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" -C /usr/local --strip-components=1
-fi
-
 fix_julia_execstack() {
     local openlibm="/usr/local/lib/julia/libopenlibm.so"
     if [ -f "${openlibm}" ]; then
@@ -26,7 +21,27 @@ fix_julia_execstack() {
     fi
 }
 
-fix_julia_execstack
+install_julia() {
+    local tarball="/tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz"
+    curl -fsSL "https://julialang-s3.julialang.org/bin/linux/x64/${JULIA_MINOR}/julia-${JULIA_VERSION}-linux-x86_64.tar.gz" \
+        -o "${tarball}"
+    sudo tar -xzf "${tarball}" -C /usr/local --strip-components=1
+    fix_julia_execstack
+}
+
+installed_julia_version=""
+if command -v julia >/dev/null 2>&1; then
+    installed_julia_version="$(julia --startup-file=no -e 'print(VERSION)' 2>/dev/null || true)"
+fi
+
+if [ "${installed_julia_version}" != "${JULIA_VERSION}" ]; then
+    echo "Installing Julia ${JULIA_VERSION} (found: ${installed_julia_version:-none})"
+    install_julia
+else
+    fix_julia_execstack
+fi
+
+julia --version
 
 run_as_app_user() {
     sudo -H -u "${APP_USER}" "$@"
