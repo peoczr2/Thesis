@@ -1,0 +1,1 @@
+instance,horizon,seed,N,w,q,beam_scorer,surrogate_model,surrogate_warmup_levels,surrogate_min_samples,surrogate_lambda,surrogate_forest_trees,surrogate_shortlist_multiplier,objective,bs_cost,ls_cost,ils_cost,bs_gap_pct,ls_gap_pct,ils_gap_pct,gap_pct,calls,levels,beam_pool,ls_improvements,beam_seconds,ls_seconds,ils_seconds,total_seconds

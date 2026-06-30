@@ -12,7 +12,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 QUEUE_FILE = Path(os.environ.get("QUEUE_FILE", "task_queue.json"))
-DEFAULT_RESULTS_CSV = QUEUE_FILE.with_name(
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SERVER_RESULTS_DIR = Path(os.environ.get("SERVER_RESULTS_DIR", str(REPO_ROOT / "results")))
+DEFAULT_RESULTS_CSV = SERVER_RESULTS_DIR / (
     f"server_run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
 )
 RESULTS_CSV = Path(
