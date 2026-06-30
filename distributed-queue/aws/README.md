@@ -40,7 +40,7 @@ curl https://YOUR-NGROK-URL.ngrok-free.app/status
 
 ## 2. Build The Base AMI Once
 
-Launch one temporary Ubuntu EC2 instance, for example `c6a.large`, SSH into it, and run:
+Launch one temporary Ubuntu EC2 instance, for example `c6a.large`, SSH into it, and run. Prefer Ubuntu 24.04 LTS; newer Ubuntu images can require the `patchelf` fix that `prepare-base-ami.sh` now applies automatically:
 
 ```bash
 sudo apt-get update
@@ -58,6 +58,7 @@ This AMI contains:
 - Ubuntu packages needed by the worker
 - git
 - Julia 1.10
+- a patched Julia `libopenlibm.so` executable-stack flag for newer Ubuntu images
 - the `distributed-queue` Julia environment
 - precompiled Julia packages under `/home/ubuntu/.julia`
 
@@ -92,9 +93,15 @@ git -C "$APP_DIR" fetch origin "$REPO_BRANCH"
 git -C "$APP_DIR" reset --hard "origin/$REPO_BRANCH"
 ```
 
-Keep `APP_USER="ubuntu"` if you built the AMI as the default Ubuntu user. User-data itself runs as root, but git and Julia run as `ubuntu` so Julia reuses `/home/ubuntu/.julia` instead of recompiling packages under `/root/.julia`.
+Keep `APP_USER="ubuntu"` if you built the AMI as the default Ubuntu user. The scripts use `sudo -H -u ubuntu` for git and Julia, so `$HOME` is `/home/ubuntu` and packages/precompile caches land in `/home/ubuntu/.julia`, not `/root/.julia`.
 
 Use `WORKERS_PER_INSTANCE=1` unless you know one machine can run multiple optimization jobs without slowing each other down.
+
+## User Context And Auto-Start Notes
+
+The `~/.julia` user-context issue is real. Do not run Julia package setup as root. `prepare-base-ami.sh` and `user-data-worker.sh` force git and Julia through `sudo -H -u "$APP_USER"` to keep the Julia depot under `/home/ubuntu/.julia`.
+
+The ghost-worker issue is solved by the Launch Template user-data: every new instance runs `user-data-worker.sh` at boot, starts the worker, and shuts down when the queue is drained. A systemd service is only needed if you want the AMI to auto-run workers without Launch Template user-data.
 
 ## 4. Launch The Spot Fleet
 

@@ -35,21 +35,21 @@ install -d -o "${APP_USER}" -g "${APP_USER}" "${RESULTS_DIR}"
 
 if [ ! -d "${APP_DIR}/.git" ]; then
     rm -rf "${APP_DIR}"
-    sudo -u "${APP_USER}" git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
+    sudo -H -u "${APP_USER}" git clone --branch "${REPO_BRANCH}" "${REPO_URL}" "${APP_DIR}"
 else
     chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}"
-    sudo -u "${APP_USER}" git -C "${APP_DIR}" remote set-url origin "${REPO_URL}"
-    sudo -u "${APP_USER}" git -C "${APP_DIR}" fetch origin "${REPO_BRANCH}"
-    sudo -u "${APP_USER}" git -C "${APP_DIR}" reset --hard "origin/${REPO_BRANCH}"
+    sudo -H -u "${APP_USER}" git -C "${APP_DIR}" remote set-url origin "${REPO_URL}"
+    sudo -H -u "${APP_USER}" git -C "${APP_DIR}" fetch origin "${REPO_BRANCH}"
+    sudo -H -u "${APP_USER}" git -C "${APP_DIR}" reset --hard "origin/${REPO_BRANCH}"
 fi
 
 cd "${APP_DIR}/distributed-queue"
-sudo -u "${APP_USER}" julia --project=. -e 'using Pkg; Pkg.instantiate()'
+sudo -H -u "${APP_USER}" julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 pids=()
 for worker_index in $(seq 1 "${WORKERS_PER_INSTANCE}"); do
     worker_id="$(hostname)-${worker_index}"
-    sudo -u "${APP_USER}" env \
+    sudo -H -u "${APP_USER}" env \
         QUEUE_SERVER="${QUEUE_SERVER}" \
         QUEUE_RESULTS_DIR="${RESULTS_DIR}" \
         WORKER_ID="${worker_id}" \
