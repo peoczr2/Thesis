@@ -4,7 +4,7 @@ This folder contains a small central coordinator and Julia worker client for run
 
 For AWS Spot workers, use the hybrid AMI setup in `aws/README.md`: keep Julia and heavy packages precompiled on the AMI, then pull the latest repo with git at boot.
 
-The server owns the queue in `task_queue.json`. Workers repeatedly pull one task, run it, and post completion. If a worker disappears, any task left `In_Progress` for more than 4 hours is automatically returned to `Pending`.
+The server owns the queue in `task_queue.json`. Workers repeatedly pull one task, run it, and post completion. If a worker hits a Julia error after receiving a task, it posts the stack trace to `/fail_task`; the server stores it as `last_error` in `task_queue.json` and retries the task up to `MAX_TASK_ATTEMPTS` times. If a worker disappears entirely, any task left `In_Progress` for more than 4 hours is automatically returned to `Pending`.
 
 ## Files
 
@@ -29,6 +29,12 @@ ngrok http 8000
 ```
 
 Copy the public `https://...ngrok-free.app` forwarding URL. Workers on the university PCs will use that URL as `QUEUE_SERVER`; they do not need to be on the same network as the server.
+
+By default failed tasks are retried 3 times. Override it when starting the server if needed:
+
+```bash
+MAX_TASK_ATTEMPTS=1 uv run --with fastapi --with uvicorn python -m uvicorn server:app --host 0.0.0.0 --port 8000
+```
 
 Check queue status from the remote server:
 

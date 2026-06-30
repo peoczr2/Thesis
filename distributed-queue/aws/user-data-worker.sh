@@ -11,6 +11,8 @@ APP_DIR="${APP_DIR:-/home/ubuntu/app}"
 APP_USER="${APP_USER:-ubuntu}"
 WORKERS_PER_INSTANCE="${WORKERS_PER_INSTANCE:-1}"
 RESULTS_DIR="${RESULTS_DIR:-/home/ubuntu/results/distributed_queue}"
+SHUTDOWN_ON_SUCCESS="${SHUTDOWN_ON_SUCCESS:-true}"
+SHUTDOWN_ON_FAILURE="${SHUTDOWN_ON_FAILURE:-false}"
 
 exec > >(tee -a /var/log/mirp-worker.log | logger -t mirp-worker -s 2>/dev/console) 2>&1
 
@@ -23,6 +25,8 @@ echo "[$(date --iso-8601=seconds)] Starting MIRP worker bootstrap"
 echo "Queue server: ${QUEUE_SERVER}"
 echo "Repository: ${REPO_URL} (${REPO_BRANCH})"
 echo "App user: ${APP_USER}"
+echo "Shutdown on success: ${SHUTDOWN_ON_SUCCESS}"
+echo "Shutdown on failure: ${SHUTDOWN_ON_FAILURE}"
 
 if ! command -v git >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
@@ -65,4 +69,14 @@ for pid in "${pids[@]}"; do
 done
 
 echo "[$(date --iso-8601=seconds)] Worker processes finished with status ${status}"
-sudo shutdown -h now
+
+if [[ "${status}" == "0" && "${SHUTDOWN_ON_SUCCESS}" == "true" ]]; then
+    echo "[$(date --iso-8601=seconds)] Shutting down after successful worker run"
+    sudo shutdown -h now
+elif [[ "${status}" != "0" && "${SHUTDOWN_ON_FAILURE}" == "true" ]]; then
+    echo "[$(date --iso-8601=seconds)] Shutting down after failed worker run"
+    sudo shutdown -h now
+else
+    echo "[$(date --iso-8601=seconds)] Leaving instance running for inspection"
+    echo "Inspect logs with: sudo tail -200 /var/log/mirp-worker.log"
+fi

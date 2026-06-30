@@ -1,0 +1,5 @@
+[deps]
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+MIRPLib = "4cf11f5c-375e-4b55-b6b7-afcf73fa2612"
+OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"

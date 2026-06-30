@@ -65,6 +65,39 @@ function complete_task(
     return JSON3.read(String(response.body))
 end
 
+function truncate_error(message::String)
+    return length(message) > 12000 ? first(message, 12000) : message
+end
+
+function fail_task(
+    instance::String,
+    horizon::Int,
+    seed::Int,
+    scorer::String,
+    error_message::String;
+    runtime_seconds::Union{Nothing, Float64} = nothing,
+)
+    payload = Dict(
+        "instance" => instance,
+        "horizon" => horizon,
+        "seed" => seed,
+        "scorer" => scorer,
+        "worker_id" => WORKER_ID,
+        "error_message" => truncate_error(error_message),
+        "runtime_seconds" => runtime_seconds,
+    )
+    body = JSON3.write(payload)
+    response = request_with_retry("POST /fail_task") do
+        HTTP.post(
+            "$(SERVER_URL)/fail_task",
+            ["Content-Type" => "application/json"; REQUEST_HEADERS],
+            body;
+            readtimeout = 60,
+        )
+    end
+    return JSON3.read(String(response.body))
+end
+
 function result_filename(instance::String, horizon::Int, seed::Int, scorer::String)
     stamp = Dates.format(now(), dateformat"yyyymmdd_HHMMSS")
     safe_worker = replace(WORKER_ID, r"[^A-Za-z0-9_.-]" => "_")
@@ -97,9 +130,27 @@ function main()
         horizon = Int(task.horizon)
         seed = Int(task.seed)
         scorer = String(task.scorer)
-        runtime_seconds, result_path = run_optimization(instance, horizon, seed, scorer)
-        response = complete_task(instance, horizon, seed, scorer; runtime_seconds = runtime_seconds, result_path = result_path)
-        println("Completed $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer): $(response)")
+        task_started = time()
+
+        try
+            runtime_seconds, result_path = run_optimization(instance, horizon, seed, scorer)
+            response = complete_task(instance, horizon, seed, scorer; runtime_seconds = runtime_seconds, result_path = result_path)
+            println("Completed $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer): $(response)")
+        catch err
+            runtime_seconds = time() - task_started
+            error_message = sprint(showerror, err, catch_backtrace())
+            println("Failed $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer):")
+            println(error_message)
+
+            try
+                response = fail_task(instance, horizon, seed, scorer, error_message; runtime_seconds = runtime_seconds)
+                println("Reported failure for $(instance), horizon=$(horizon), seed=$(seed), scorer=$(scorer): $(response)")
+            catch report_err
+                println("Could not report failure to queue server:")
+                println(sprint(showerror, report_err, catch_backtrace()))
+                rethrow(report_err)
+            end
+        end
     end
 end
 
