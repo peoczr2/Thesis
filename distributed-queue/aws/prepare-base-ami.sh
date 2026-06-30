@@ -4,7 +4,7 @@ set -euo pipefail
 # Run this once on a temporary Ubuntu EC2 instance, then create an AMI from it.
 # It installs Julia and precompiles the distributed queue worker environment.
 
-JULIA_VERSION="${JULIA_VERSION:-1.11.9}"
+JULIA_VERSION="${JULIA_VERSION:-1.12.6}"
 JULIA_MINOR="${JULIA_VERSION%.*}"
 REPO_URL="${REPO_URL:-https://github.com/peoczr2/Thesis.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
