@@ -1,7 +1,5 @@
 using MIRPLib
 
-# A call is the atomic routing decision: one vessel visiting one port.
-# Evaluation also stores predecessor/successor links and cumulative costs here.
 mutable struct Call
     port::Port
     vessel::Vessel
@@ -40,7 +38,6 @@ function Call(port::Port, vessel::Vessel)
     )
 end
 
-# A solution is a call sequence plus evaluator caches for the latest rebuilt state.
 mutable struct Solution
     calls::Vector{Call}
     score::Float64
@@ -108,19 +105,12 @@ function clone_solution(mirp::MIRP, solution::Solution)
     return Solution(mirp, copy_calls(solution.calls))
 end
 
-# TODO: maybe useless
-function append_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
-    calls = copy_calls(solution.calls)
-    push!(calls, Call(port, vessel))
-    return Solution(mirp, calls)
-end
-
 """
 Hard copy a solution with rewired internal call links.
 """
 function clone_evaluated_solution(mirp::MIRP, solution::Solution)
     old_to_new = IdDict{Call, Call}()
-    calls = sizehint(Call, length(solution.calls))
+    calls = sizehint!(Call[], length(solution.calls))
 
     for call in solution.calls
         copied = copy_evaluated_call(call)

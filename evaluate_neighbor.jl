@@ -490,148 +490,29 @@ end
 
 
 """
-Modifies the solution by evaluating the calls from a certain index to the end, and returns the modified solution.
+Modifies the solution by evaluating the calls from a certain index to the end, and returns the modified solution. It uses the existing call list.
 """
 function evaluate_suffix_neighbor!(
     mirp::MIRP,
     solution::Solution,
     prefix_length::Int64,
-    suffix_calls;
     add_final_inventory_cost::Bool = true,
 ) # TODO: this function should not make a hard copy of the solution and should assume that the solution is correctly evaluated up to the prefix index call
-    candidate = clone_evaluated_prefix(mirp, solution, prefix_length)
-    berth_use = berth_use_by_port(mirp, candidate)
 
-    for call in suffix_calls
-        replay_status = append_replayed_call!(mirp, candidate, call, berth_use)
-        replay_status === :appended && continue
-        replay_status === :truncated && break
-        return nothing
-    end
-
-    add_final_inventory_cost && add_final_inventory_cost!(mirp, candidate)
-    return candidate.feasible && isfinite(candidate.score) ? candidate : nothing
-end
-
-function evaluate_suffix_neighbor!(
-    mirp::MIRP,
-    solution::Solution,
-    prefix_length::Int64;
-    add_final_inventory_cost::Bool = true,
-)
-    suffix_calls = suffix_from_order(solution.calls, prefix_length)
-    return evaluate_suffix_neighbor!(
-        mirp,
-        solution,
-        prefix_length,
-        suffix_calls;
-        add_final_inventory_cost = add_final_inventory_cost,
-    )
-end
-
-function evaluate_suffix_neighbor(
-    mirp::MIRP,
-    solution::Solution,
-    prefix_length::Int64,
-    suffix_calls;
-    add_final_inventory_cost::Bool = true,
-)
-    return evaluate_suffix_neighbor!(
-        mirp,
-        solution,
-        prefix_length,
-        suffix_calls;
-        add_final_inventory_cost = add_final_inventory_cost,
-    )
-end
-
-function suffix_from_order(order::Vector{Call}, prefix_length::Int64)
-    suffix = Call[]
-    sizehint!(suffix, length(order) - prefix_length)
-    for k in (prefix_length + 1):length(order)
-        push!(suffix, order[k])
-    end
-    return suffix
-end
-
-function evaluate_swap(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
-    prefix_length = i - 1
-    suffix = Call[]
-    sizehint!(suffix, length(solution.calls) - prefix_length)
-
-    for k in i:length(solution.calls)
-        if k == i
-            push!(suffix, solution.calls[j])
-        elseif k == j
-            push!(suffix, solution.calls[i])
+    i = prefix_length + 1
+    while i <= length(solution.calls)
+        status = evaluate_call!(mirp, solution, i)
+        if status === :fulfilled
+            i += 1
+        elseif status === :discarded
+            break
         else
-            push!(suffix, solution.calls[k])
+            return nothing
         end
     end
 
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
+    add_final_inventory_cost && add_final_inventory_cost!(mirp, solution)
+    return solution.feasible && isfinite(solution.score) ? solution : nothing
 end
 
-function evaluate_relocate(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
-    order = copy(solution.calls)
-    call = splice!(order, i)
-    insert!(order, j, call)
-    prefix_length = min(i, j) - 1
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix_from_order(order, prefix_length))
-end
 
-function evaluate_replace(mirp::MIRP, solution::Solution, i::Int64, port::Port)
-    prefix_length = i - 1
-    suffix = Call[]
-    sizehint!(suffix, length(solution.calls) - prefix_length)
-    old_call = solution.calls[i]
-    push!(suffix, Call(port, old_call.vessel))
-
-    for k in (i + 1):length(solution.calls)
-        push!(suffix, solution.calls[k])
-    end
-
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
-end
-
-function evaluate_insert(mirp::MIRP, solution::Solution, first_port::Port, vessel::Vessel, second_port::Port)
-    prefix_length = length(solution.calls)
-    suffix = [Call(first_port, vessel), Call(second_port, vessel)]
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
-end
-
-function evaluate_remove(mirp::MIRP, solution::Solution, first_index::Int64, second_index::Union{Nothing, Int64} = nothing)
-    prefix_length = first_index - 1
-    suffix = Call[]
-    sizehint!(suffix, length(solution.calls) - prefix_length - 1 - (second_index === nothing ? 0 : 1))
-
-    for k in first_index:length(solution.calls)
-        if k == first_index || k == second_index
-            continue
-        end
-        push!(suffix, solution.calls[k])
-    end
-
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
-end
-
-function evaluate_swap_port(mirp::MIRP, solution::Solution, i::Int64, j::Int64)
-    # TODO: could be like instead of returning a hard copy it could return only the final score, that was calculated by starting from i-1 accepting as it was evaled then go until j-1 keep in mind that j changed then go until the end. And the eval is basically just keeping track of the current state not for all eval and not overriding the solution. 
-    prefix_length = i - 1
-    suffix = Call[]
-    sizehint!(suffix, length(solution.calls) - prefix_length)
-    call_i = solution.calls[i]
-    call_j = solution.calls[j]
-
-    for k in i:length(solution.calls)
-        if k == i
-            push!(suffix, Call(call_j.port, call_i.vessel))
-        elseif k == j
-            push!(suffix, Call(call_i.port, call_j.vessel))
-        else
-            push!(suffix, solution.calls[k])
-        end
-    end
-
-    return evaluate_suffix_neighbor(mirp, solution, prefix_length, suffix)
-end

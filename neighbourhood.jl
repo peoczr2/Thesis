@@ -4,8 +4,6 @@ using Random
 # TODO: clean this up, why is there 3 seperate names...
 # Neighborhoods used by RVND and by the ILS perturbation step.
 const NEIGHBORHOODS = [:swap, :relocate, :replace, :insert, :remove, :swap_port]
-const neigbourhoods = NEIGHBORHOODS
-const neighborhoods = NEIGHBORHOODS
 
 function ordered_indices(rng::AbstractRNG, n::Int64, randomize::Bool)
     return randomize ? randperm(rng, n) : Base.OneTo(n)
@@ -15,6 +13,9 @@ function ordered_items(rng::AbstractRNG, items, randomize::Bool)
     return randomize ? shuffle(rng, collect(items)) : items
 end
 
+"""
+score is finite, not nothing and is better than the current score
+"""
 function accepted_score(score::Float64, current_score::Union{Nothing, Float64})
     isfinite(score) || return false
     current_score === nothing && return true
@@ -257,26 +258,6 @@ function neighborhood_neighbor!(
 
     throw(ArgumentError("Unknown neighborhood: $(neighborhood)"))
 end
-
-"""function apply_neighborhood!( not needed for now
-    mirp::MIRP,
-    solution::Solution,
-    neighborhood::Symbol;
-    rng::AbstractRNG = Random.default_rng(),
-    randomize::Bool = true,
-    evaluator::CallEvaluator = CallEvaluator(mirp),
-)
-    source_solution = neighbor_source_solution(mirp, solution)
-    move = neighborhood_neighbor!(
-        mirp,
-        source_solution,
-        neighborhood;
-        rng = rng,
-        randomize = randomize,
-        evaluator = evaluator,
-    )
-    return move === nothing ? clone_solution(mirp, source_solution) : apply_neighbor_move(mirp, source_solution, move)
-end"""
 
 """
 Modifies the solution by applying a perturbation to it by exploring its neighborhood and returns that modified solution.
