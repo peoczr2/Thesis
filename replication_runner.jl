@@ -40,6 +40,7 @@ const DEFAULT_RESULTS_DIR = "results"
 # Instance subset requested for the replication run. Override with
 # --instances=LR1_DR02_VC01_V6a,LR1_DR02_VC02_V6a when needed.
 const DEFAULT_TARGET_INSTANCES = [
+    :LR1_DR02_VC01_V6a,
     :LR1_DR02_VC02_V6a,
     :LR1_DR02_VC03_V7a,
     :LR1_DR02_VC03_V8a,
