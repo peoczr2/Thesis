@@ -159,7 +159,7 @@ function beam_search(
     levels = 0
 
     while !isempty(beam_nodes)
-        successors = Solution[]
+        successors = Solution[] # maybe sizehint this or take it outside the while or like use reset idk
 
         for node in beam_nodes
             node_successors, completed_solutions = expand_node(mirp, node, w, levels, model; rng = rng)
@@ -175,8 +175,8 @@ function beam_search(
         beam_nodes = keep_best_N_unique(successors, N) # TODO: this could be more efficient with better datastructure
         levels += 1
     end
-
-    fallback = evaluate_solution!(mirp, Solution(mirp); add_final_inventory_cost = true)
+    
+    fallback = evaluate_solution!(mirp, Solution(mirp); add_final_inventory_cost = true) # TODO: ... not sure if this is needed, as the initial node should be already included
     ranked_final_candidates = keep_best_N_unique(vcat(best_n, [fallback]), N)
     best_solution = ranked_final_candidates[1]
 

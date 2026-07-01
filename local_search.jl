@@ -3,9 +3,9 @@ using Random
 
 """
 Randomized Variable Neighborhood Descent (RVND), using first improvement.
-Modifies the initial solution
-Neighborhoods first efficiently scores neighbors with a reusable call evaluator, 
-if the score is better than the current solution is modified by applying the neighbor change.
+Modifies the initial solution.
+Neighborhoods first efficiently score neighbors with a reusable call evaluator, 
+if the score is better then the current solution is modified by applying the neighbor change.
 After no better solution can be found the solution is returned.
 """
 function local_search!(
@@ -36,7 +36,7 @@ function local_search!(
             )
             neighbor === nothing && continue
 
-            current_solution = neighbor # apply_neighbor_move(mirp, current_solution, neighbor)
+            current_solution = neighbor
             found_better_solution = true
             break
         end
@@ -55,7 +55,7 @@ function local_search(
     neighborhoods_to_use::Vector{Symbol} = collect(NEIGHBORHOODS),
     randomize::Bool = true,
 )
-    current_solution = evaluate_solution!(mirp, clone_solution(mirp, initial_solution); add_final_inventory_cost = true) # TODO: needs to be hard copy
+    current_solution = clone_evaluated_solution(mirp, initial_solution) #evaluate_solution!(mirp, clone_solution(mirp, initial_solution); add_final_inventory_cost = true) # TODO: needs to be hard copy
     !current_solution.feasible && return current_solution # TODO: what is even this line for? I mean local_search would obviously get a feasible solution(every solution is feasible only calls are not), then local_search trys to find a better solution
 
     return local_search!(mirp, current_solution; rng = rng, neighborhoods_to_use = neighborhoods_to_use, randomize = randomize)

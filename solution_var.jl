@@ -75,10 +75,16 @@ function Solution(mirp::MIRP, calls::Vector{Call})
     return solution
 end
 
+"""
+Creates an empty call with port and vessel id
+"""
 function copy_call(call::Call)
     return Call(call.port, call.vessel)
 end
 
+"""
+Hard copies a call, zeros out the internal links
+"""
 function copy_evaluated_call(call::Call)
     copied = copy_call(call)
     copied.last_service_time_vessel = call.last_service_time_vessel
@@ -92,27 +98,29 @@ function copy_evaluated_call(call::Call)
     return copied
 end
 
+# TODO: if others useless, this is too
 function copy_calls(calls::Vector{Call})
     return [copy_call(call) for call in calls]
 end
 
+# TODO: maybe useless
 function clone_solution(mirp::MIRP, solution::Solution)
     return Solution(mirp, copy_calls(solution.calls))
 end
 
+# TODO: maybe useless
 function append_call(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
     calls = copy_calls(solution.calls)
     push!(calls, Call(port, vessel))
     return Solution(mirp, calls)
 end
 
-# TODO: check this function
 """
 Hard copy a solution with rewired internal call links.
 """
 function clone_evaluated_solution(mirp::MIRP, solution::Solution)
     old_to_new = IdDict{Call, Call}()
-    calls = Call[]
+    calls = sizehint(Call, length(solution.calls))
 
     for call in solution.calls
         copied = copy_evaluated_call(call)
@@ -145,6 +153,9 @@ function clone_evaluated_solution(mirp::MIRP, solution::Solution)
     return cloned
 end
 
+"""
+Returns a tuple of the calls
+"""
 function solution_signature(solution::Solution)
     return Tuple((call.port.id, call.vessel.id) for call in solution.calls)
 end

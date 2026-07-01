@@ -1,7 +1,9 @@
 
 using Random
 
-# Table 4 parameters from the paper's ILS tuning section.
+"""
+Table 4 parameters from the paper's ILS tuning section.
+"""
 Base.@kwdef struct ILSParameters
     initial_probability::Float64 = 0.79
     final_probability::Float64 = 0.01
@@ -12,8 +14,10 @@ end
 
 const PAPER_ILS_PARAMETERS = ILSParameters()
 
-# Exponential interpolation between the reported initial and final acceptance
-# probabilities for non-improving moves.
+"""
+Exponential interpolation between the reported initial and final acceptance
+probabilities for non-improving moves.
+"""
 function annealing_probability(iteration::Int64, params::ILSParameters)
     if params.iterations <= 1
         return params.final_probability
@@ -33,9 +37,10 @@ function sim_annealing_criterion(
     new_solution.score + EPS < current_solution.score && return true
     return rand(rng) <= annealing_probability(iteration, params)
 end
-
-# Perturb, locally improve, accept with simulated annealing, and periodically
-# restore the search to the best incumbent after accepted non-improvements.
+"""
+Given a solution tries to find better by perturbing, locally improving, accepting with simulated annealing, and periodically
+restoring the search to the best incumbent after accepted non-improvements.
+"""
 function iterated_local_search(
     mirp::MIRP,
     initial_solution::Solution;
