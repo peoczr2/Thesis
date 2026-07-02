@@ -9,6 +9,9 @@ function load_after_call(call::Call)
     return call.port.type == :loading ? Float64(call.vessel.class.capacity) : 0.0
 end
 
+"""
+Solution state.
+"""
 mutable struct CallEvaluator
     vessel_last_port::Vector{Port}
     vessel_has_call::Vector{Bool}

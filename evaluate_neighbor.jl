@@ -165,14 +165,12 @@ function evaluate_suffix_neighbor!(
     solution::Solution,
     prefix_length::Int64,
     add_final_inventory_cost::Bool = true;
-    evaluator::CallEvaluator = CallEvaluator(mirp),
 )
-    reset_evaluator_to_prefix!(evaluator, mirp, solution, prefix_length)
     reset_solution_to_evaluated_prefix!(mirp, solution, prefix_length)
 
     i = prefix_length + 1
     while i <= length(solution.calls)
-        status = evaluate_call_i!(mirp, solution, evaluator, i)
+        status = evaluate_call_i!(mirp, solution, i)
         if status === :fulfilled
             i += 1
         elseif status === :discarded

@@ -419,9 +419,11 @@ function reset_solution_to_evaluated_prefix!(mirp::MIRP, solution::Solution, pre
 end
 
 """
-Modifies the solution by evaluating a call at a specific index in the solution.
+Assumes the solution has been reset to the evaluated call_index-1 prefix
+Modifies the solution by evaluating a call at a specific index in the solution and makes it as that was the last call without finalizing the solution.
+USe olny if this function is called for all calls till the end of the solution
 """
-function evaluate_call_i!(mirp::MIRP, solution::Solution, evaluator::CallEvaluator, call_index::Int64)
+function evaluate_call_i!(mirp::MIRP, solution::Solution, call_index::Int64)
     if call_index < 1 || call_index > length(solution.calls)
         throw(BoundsError(solution.calls, call_index))
     end
@@ -429,87 +431,44 @@ function evaluate_call_i!(mirp::MIRP, solution::Solution, evaluator::CallEvaluat
     call = solution.calls[call_index]
     port = call.port
     vessel = call.vessel
-    port_id = port.id
-    vessel_id = vessel.id
-
-    last_occ_port = evaluator.last_occ_ports[port_id]
-    last_occ_vessel = evaluator.last_occ_vessels[vessel_id]
-    last_service_time_vessel = evaluator.vessel_time[vessel_id]
-
-    clear_call_state!(call)
-    status = evaluate_call!(evaluator, mirp, port, vessel)
-
-    if status === :infeasible
-        solution.feasible = false
-        solution.score = Inf
-        return status
-    elseif status === :discarded
-        resize!(solution.calls, call_index - 1)
-        solution.score = evaluator.routing_cost + evaluator.inventory_cost
-        solution.feasible = true
-        return status
-    end
-
-    service_time = evaluator.vessel_time[vessel_id]
-    call.last_occ_port = last_occ_port
-    call.last_occ_vessel = last_occ_vessel
-    if last_occ_port !== nothing
-        last_occ_port.next_occ_port = call
-    end
-    if last_occ_vessel !== nothing
-        last_occ_vessel.next_occ_vessel = call
-    end
-
-    call.last_service_time_vessel = last_service_time_vessel
-    call.service_time_port = service_time
-    call.num_vessels_in_port = evaluator.berth_use[port_id][service_time]
-    call.inventory_level = evaluator.port_inventory[port_id]
-    call.next_violation_time = evaluator.port_next_violation[port_id]
-    call.acc_routing_costs = evaluator.routing_cost
-    call.acc_inventory_costs = evaluator.inventory_cost
-    call.acc_total_costs = evaluator.routing_cost + evaluator.inventory_cost
-
-    evaluator.last_occ_ports[port_id] = call
-    evaluator.last_occ_vessels[vessel_id] = call
-
-    solution.last_occ_ports[port_id] = call
-    solution.last_occ_vessels[vessel_id] = call
-    solution.vessel_inventory[vessel_id] = evaluator.vessel_inventory[vessel_id]
-    solution.vessel_time[vessel_id] = evaluator.vessel_time[vessel_id]
-    solution.port_inventory[port_id] = evaluator.port_inventory[port_id]
-    solution.port_time[port_id] = evaluator.port_time[port_id]
-    solution.port_next_violation[port_id] = evaluator.port_next_violation[port_id]
-    solution.score = call.acc_total_costs
-    solution.feasible = true
-    return status
-end
-
-function evaluate_call_i!(mirp::MIRP, solution::Solution, call_index::Int64)
-    evaluator = CallEvaluator(mirp)
-    reset_evaluator_to_prefix!(evaluator, mirp, solution, call_index - 1)
-    reset_solution_to_evaluated_prefix!(mirp, solution, call_index - 1)
-    return evaluate_call_i!(mirp, solution, evaluator, call_index)
-end
-
-"""
-Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place. It does not finalize the evaluation, thus final score is not calculated
-"""
-function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::AppendCandidate)
-    port = candidate.port
-    vessel = candidate.vessel
-    call = Call(port, vessel)
     time_horizon = horizon(mirp)
     port_id = port.id
     vessel_id = vessel.id
-    last_occ_vessel = solution.last_occ_vessels[vessel_id]
+
+    clear_call_state!(call)
+
+    if !is_feasible(solution, port, vessel)
+        solution.feasible = false
+        solution.score = Inf
+        return :infeasible
+    end
+
     last_occ_port = solution.last_occ_ports[port_id]
+    last_occ_vessel = solution.last_occ_vessels[vessel_id]
     from_port = last_occ_vessel === nothing ? vessel.initial_port : last_occ_vessel.port
     last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
-    service_time = candidate.service_time
-    vessels_in_port = candidate.vessels_in_port
+    arrival = max(1, last_service_time_vessel + vessel.class.travel_times[from_port.id, port_id])
+    berth_use = berth_use_for_port(solution, port_id, call_index - 1)
+    service_time, vessels_in_port = first_service_time(
+        mirp,
+        solution,
+        port,
+        vessel,
+        berth_use,
+        arrival,
+        time_horizon,
+    )
 
-    routing_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_routing_costs # TODO: maybe it could accept that its initialized with 0.0
-    inventory_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_inventory_costs
+    if service_time > time_horizon
+        resize!(solution.calls, call_index - 1)
+        solution.score = call_index == 1 ? 0.0 : solution.calls[call_index - 1].acc_total_costs
+        solution.feasible = true
+        return :discarded
+    end
+
+    routing_cost = call_index == 1 ? 0.0 : solution.calls[call_index - 1].acc_routing_costs
+    inventory_cost = call_index == 1 ? 0.0 : solution.calls[call_index - 1].acc_inventory_costs
+
     inventory, penalty = advance_inventory(
         mirp,
         port,
@@ -524,13 +483,13 @@ function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::Appen
     routing_cost += route_cost(mirp, vessel, from_port, port, cargo_before)
     inventory_cost += apply_service!(mirp, solution, call, service_time)
 
-    call.last_occ_vessel = last_occ_vessel
     call.last_occ_port = last_occ_port
-    if last_occ_vessel !== nothing
-        last_occ_vessel.next_occ_vessel = call
-    end
+    call.last_occ_vessel = last_occ_vessel
     if last_occ_port !== nothing
         last_occ_port.next_occ_port = call
+    end
+    if last_occ_vessel !== nothing
+        last_occ_vessel.next_occ_vessel = call
     end
 
     call.last_service_time_vessel = last_service_time_vessel
@@ -538,18 +497,27 @@ function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::Appen
     call.num_vessels_in_port = vessels_in_port
     call.inventory_level = solution.port_inventory[port_id]
     call.next_violation_time = next_violation_period(port, call.inventory_level, service_time, time_horizon)
-    solution.port_next_violation[port_id] = call.next_violation_time
     call.acc_routing_costs = routing_cost
     call.acc_inventory_costs = inventory_cost
     call.acc_total_costs = routing_cost + inventory_cost
 
-    push!(solution.calls, call)
     solution.last_occ_ports[port_id] = call
     solution.last_occ_vessels[vessel_id] = call
-    solution.port_time[port_id] = service_time
     solution.vessel_time[vessel_id] = service_time
-    solution.score = routing_cost + inventory_cost
+    solution.port_time[port_id] = service_time
+    solution.port_next_violation[port_id] = call.next_violation_time
+    solution.score = call.acc_total_costs
     solution.feasible = true
+    return :fulfilled
+end
+
+"""
+Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place. It does not finalize the evaluation, thus final score is not calculated
+"""
+function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::AppendCandidate)
+    push!(solution.calls, Call(candidate.port, candidate.vessel))
+    status = evaluate_call_i!(mirp, solution, length(solution.calls))
+    status === :fulfilled || return solution
     return solution
 end
 
@@ -578,10 +546,9 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
     reset_solution_state!(solution, mirp)
     solution.score = 0.0
 
-    evaluator = CallEvaluator(mirp)
     i = 1
     while i <= length(solution.calls)
-        status = evaluate_call_i!(mirp, solution, evaluator, i)
+        status = evaluate_call_i!(mirp, solution, i)
         if status === :fulfilled
             i += 1
         elseif status === :discarded
@@ -594,7 +561,7 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
     if add_final_inventory_cost
         finalize_evaluation!(mirp, solution)
     else
-        solution.score = evaluator.routing_cost + evaluator.inventory_cost
+        solution.score = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_total_costs
         solution.feasible = true
     end
 
