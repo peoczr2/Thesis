@@ -301,6 +301,23 @@ function berth_use_for_port(solution::Solution, port_id::Int64, prefix_length::I
     return berth_use
 end
 
+"""
+Calculates the berth use for each port up until solution prefix.
+"""
+function berth_use_by_port(mirp::MIRP, solution::Solution, prefix_length::Int64 = length(solution.calls))
+    berth_use = [Dict{Int64, Int64}() for _ in mirp.ports]
+    for i in 1:prefix_length
+        call = solution.calls[i]
+        if call.service_time_port > 0
+            port_id = call.port.id
+            service_time = call.service_time_port
+            berth_use[port_id][service_time] = get(berth_use[port_id], service_time, 0) + 1
+        end
+    end
+
+    return berth_use
+end
+
 function candidate_append(mirp::MIRP, solution::Solution, port::Port, vessel::Vessel)
     return candidate_append(mirp, solution, port, vessel, berth_use_for_port(solution, port.id))
 end
@@ -419,11 +436,16 @@ function reset_solution_to_evaluated_prefix!(mirp::MIRP, solution::Solution, pre
 end
 
 """
-Assumes the solution has been reset to the evaluated call_index-1 prefix
+Assumes the solution has been reset to the evaluated call_index-1 prefix with the berth_use at that point.
 Modifies the solution by evaluating a call at a specific index in the solution and makes it as that was the last call without finalizing the solution.
 USe olny if this function is called for all calls till the end of the solution
 """
-function evaluate_call_i!(mirp::MIRP, solution::Solution, call_index::Int64)
+function evaluate_call_i!(
+    mirp::MIRP,
+    solution::Solution,
+    call_index::Int64,
+    berth_use::Union{Nothing, Dict{Int64, Int64}} = nothing,
+)
     if call_index < 1 || call_index > length(solution.calls)
         throw(BoundsError(solution.calls, call_index))
     end
@@ -448,7 +470,10 @@ function evaluate_call_i!(mirp::MIRP, solution::Solution, call_index::Int64)
     from_port = last_occ_vessel === nothing ? vessel.initial_port : last_occ_vessel.port
     last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
     arrival = max(1, last_service_time_vessel + vessel.class.travel_times[from_port.id, port_id])
-    berth_use = berth_use_for_port(solution, port_id, call_index - 1)
+    if berth_use === nothing
+        berth_use = berth_use_for_port(solution, port_id, call_index - 1)
+    end
+
     service_time, vessels_in_port = first_service_time(
         mirp,
         solution,
@@ -506,6 +531,7 @@ function evaluate_call_i!(mirp::MIRP, solution::Solution, call_index::Int64)
     solution.vessel_time[vessel_id] = service_time
     solution.port_time[port_id] = service_time
     solution.port_next_violation[port_id] = call.next_violation_time
+    berth_use[service_time] = vessels_in_port
     solution.score = call.acc_total_costs
     solution.feasible = true
     return :fulfilled
@@ -515,9 +541,61 @@ end
 Append a known-feasible candidate to an evaluated solution, updating evaluator caches in place. It does not finalize the evaluation, thus final score is not calculated
 """
 function append_evaluated_call!(mirp::MIRP, solution::Solution, candidate::AppendCandidate)
-    push!(solution.calls, Call(candidate.port, candidate.vessel))
-    status = evaluate_call_i!(mirp, solution, length(solution.calls))
-    status === :fulfilled || return solution
+    port = candidate.port
+    vessel = candidate.vessel
+    call = Call(port, vessel)
+    time_horizon = horizon(mirp)
+    port_id = port.id
+    vessel_id = vessel.id
+    last_occ_vessel = solution.last_occ_vessels[vessel_id]
+    last_occ_port = solution.last_occ_ports[port_id]
+    from_port = last_occ_vessel === nothing ? vessel.initial_port : last_occ_vessel.port
+    last_service_time_vessel = last_occ_vessel === nothing ? vessel.first_time : last_occ_vessel.service_time_port
+    service_time = candidate.service_time
+    vessels_in_port = candidate.vessels_in_port
+
+    routing_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_routing_costs
+    inventory_cost = isempty(solution.calls) ? 0.0 : solution.calls[end].acc_inventory_costs
+    inventory, penalty = advance_inventory(
+        mirp,
+        port,
+        solution.port_inventory[port_id],
+        solution.port_time[port_id],
+        service_time - 1,
+    )
+    solution.port_inventory[port_id] = inventory
+    inventory_cost += penalty
+
+    cargo_before = solution.vessel_inventory[vessel_id]
+    routing_cost += route_cost(mirp, vessel, from_port, port, cargo_before)
+    inventory_cost += apply_service!(mirp, solution, call, service_time)
+
+    call.last_occ_vessel = last_occ_vessel
+    call.last_occ_port = last_occ_port
+    if last_occ_vessel !== nothing
+        last_occ_vessel.next_occ_vessel = call
+    end
+    if last_occ_port !== nothing
+        last_occ_port.next_occ_port = call
+    end
+
+    call.last_service_time_vessel = last_service_time_vessel
+    call.service_time_port = service_time
+    call.num_vessels_in_port = vessels_in_port
+    call.inventory_level = solution.port_inventory[port_id]
+    call.next_violation_time = next_violation_period(port, call.inventory_level, service_time, time_horizon)
+    call.acc_routing_costs = routing_cost
+    call.acc_inventory_costs = inventory_cost
+    call.acc_total_costs = routing_cost + inventory_cost
+
+    push!(solution.calls, call)
+    solution.last_occ_ports[port_id] = call
+    solution.last_occ_vessels[vessel_id] = call
+    solution.port_time[port_id] = service_time
+    solution.vessel_time[vessel_id] = service_time
+    solution.port_next_violation[port_id] = call.next_violation_time
+    solution.score = call.acc_total_costs
+    solution.feasible = true
     return solution
 end
 
@@ -546,9 +624,11 @@ function evaluate_solution!(mirp::MIRP, solution::Solution; add_final_inventory_
     reset_solution_state!(solution, mirp)
     solution.score = 0.0
 
+    berth_use = berth_use_by_port(mirp, solution, 0)
     i = 1
     while i <= length(solution.calls)
-        status = evaluate_call_i!(mirp, solution, i)
+        call = solution.calls[i]
+        status = evaluate_call_i!(mirp, solution, i, berth_use[call.port.id])
         if status === :fulfilled
             i += 1
         elseif status === :discarded

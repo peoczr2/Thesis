@@ -167,10 +167,12 @@ function evaluate_suffix_neighbor!(
     add_final_inventory_cost::Bool = true;
 )
     reset_solution_to_evaluated_prefix!(mirp, solution, prefix_length)
+    berth_use = berth_use_by_port(mirp, solution, prefix_length)
 
     i = prefix_length + 1
     while i <= length(solution.calls)
-        status = evaluate_call_i!(mirp, solution, i)
+        call = solution.calls[i]
+        status = evaluate_call_i!(mirp, solution, i, berth_use[call.port.id])
         if status === :fulfilled
             i += 1
         elseif status === :discarded
